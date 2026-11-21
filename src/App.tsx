@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AppLayout } from './app/layout/AppLayout';
 import { TopBar } from './shell/TopBar/TopBar';
 import { NavRail } from './shell/NavRail/NavRail';
@@ -5,9 +6,27 @@ import { SubsystemHost } from './subsystems/SubsystemHost';
 import { Badge } from './ui/Badge';
 import { Select } from './ui/Select';
 import { useSessionStore } from './store/sessionStore';
+import { sqliteRpc } from './engine/rpc';
 
 export function App() {
-  const { sqliteVersion } = useSessionStore();
+  const { sqliteVersion, setSqliteVersion, setPageStats, setJournalMode } = useSessionStore();
+
+  useEffect(() => {
+    sqliteRpc
+      .init()
+      .then((data) => {
+        setSqliteVersion(data.version);
+        setPageStats(
+          data.pageStats.pageSize,
+          data.pageStats.pageCount,
+          data.pageStats.freelistCount
+        );
+        setJournalMode(data.pageStats.journalMode);
+      })
+      .catch((err) => {
+        console.error('Failed to initialize SQLite WASM:', err);
+      });
+  }, [setSqliteVersion, setPageStats, setJournalMode]);
 
   return (
     <AppLayout
