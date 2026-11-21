@@ -1,3 +1,4 @@
+import React from 'react';
 import { useSessionStore } from '../store/sessionStore';
 import { StorageView } from './storage/StorageView';
 import { IndexLabView } from './index-lab/IndexLabView';
@@ -7,7 +8,7 @@ import { TransactionsView } from './transactions/TransactionsView';
 import { JournalWalView } from './journal-wal/JournalWalView';
 import { SchemaView } from './schema/SchemaView';
 
-export function SubsystemHost() {
+export const SubsystemHost = React.memo(function SubsystemHost() {
   const { activeSubsystem } = useSessionStore();
 
   switch (activeSubsystem) {
@@ -28,4 +29,4 @@ export function SubsystemHost() {
     default:
       return <StorageView />;
   }
-}
+});

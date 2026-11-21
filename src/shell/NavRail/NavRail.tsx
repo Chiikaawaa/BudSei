@@ -1,11 +1,11 @@
-import { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import styles from './NavRail.module.css';
 import { SUBSYSTEM_ROUTES } from '../../app/routes';
 import { useSessionStore } from '../../store/sessionStore';
 import { useUiStore } from '../../store/uiStore';
 import { NavIcon } from './navIcons';
 
-export function NavRail() {
+export const NavRail = React.memo(function NavRail() {
   const { activeSubsystem, setActiveSubsystem } = useSessionStore();
   const { navRailCollapsed, toggleNavRail } = useUiStore();
 
@@ -83,4 +83,4 @@ export function NavRail() {
       </div>
     </nav>
   );
-}
+});

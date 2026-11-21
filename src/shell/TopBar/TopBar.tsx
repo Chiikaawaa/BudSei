@@ -1,3 +1,4 @@
+import React from 'react';
 import styles from './TopBar.module.css';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
@@ -6,7 +7,7 @@ import { useSessionStore } from '../../store/sessionStore';
 import { useUiStore } from '../../store/uiStore';
 import { useSettingsStore } from '../../store/settingsStore';
 
-export function TopBar() {
+export const TopBar = React.memo(function TopBar() {
   const { pageSize, pageCount, dbName, connectionMode, toggleConnectionMode, isExecuting } =
     useSessionStore();
   const { toggleTheoryDrawer, setCommandPaletteOpen } = useUiStore();
@@ -90,4 +91,4 @@ export function TopBar() {
       </div>
     </div>
   );
-}
+});
