@@ -44,7 +44,7 @@
 }
 
 .accent {
-  color: var(--accent-color);
-  background: var(--accent-tint);
+  color: var(--badge-accent-text, var(--accent-color));
+  background: var(--badge-accent-bg, var(--accent-tint));
   border: 1px solid var(--accent-border);
 }

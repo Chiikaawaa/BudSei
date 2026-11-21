@@ -47,19 +47,19 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
       ctx.fillRect(0, 0, xHd, height);
       if (xHd > 14) {
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 10px "Space Mono", monospace';
+        ctx.font = 'bold 10px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('HD', xHd / 2, height / 2);
       }
     }
 
-    // 2. B-Tree Page Header (TR)
+    // 2. B-Tree Header (TR)
     ctx.fillStyle = '#f59e0b';
     ctx.fillRect(xHd, 0, xTr - xHd, height);
     if (xTr - xHd > 14) {
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px "Space Mono", monospace';
+      ctx.font = 'bold 10px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('TR', xHd + (xTr - xHd) / 2, height / 2);
@@ -71,7 +71,7 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
       ctx.fillRect(xTr, 0, xCp - xTr, height);
       if (xCp - xTr > 16) {
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 9px "Space Mono", monospace';
+        ctx.font = 'bold 9px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('CP', xTr + (xCp - xTr) / 2, height / 2);
@@ -79,13 +79,13 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
     }
 
     // 4. Unallocated Free Space
-    ctx.fillStyle = isLight ? '#eae5dc' : '#1c1c22';
+    ctx.fillStyle = isLight ? '#f0ede7' : '#202020';
     const freeWidth = Math.max(0, xContent - xCp);
     ctx.fillRect(xCp, 0, freeWidth, height);
 
     if (freeWidth > 120) {
-      ctx.fillStyle = isLight ? '#6e6962' : '#8e8e9f';
-      ctx.font = '10px "Space Mono", monospace';
+      ctx.fillStyle = isLight ? '#6e6e6e' : '#a8a8a8';
+      ctx.font = '10px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`UNALLOCATED FREE (${page.freeSpaceBytes} B)`, xCp + freeWidth / 2, height / 2);

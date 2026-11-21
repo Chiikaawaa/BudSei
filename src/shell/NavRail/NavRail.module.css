@@ -63,8 +63,8 @@
 }
 
 .active {
-  background: var(--accent-tint);
-  color: var(--accent-color);
+  background: var(--nav-active-bg, var(--accent-tint));
+  color: var(--nav-active-text, var(--accent-color));
   border-left: 3px solid var(--accent-color);
   font-weight: 600;
 }

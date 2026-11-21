@@ -93,7 +93,7 @@
 
 .bottomDrawerContainer {
   border-top: 1px solid var(--border-color);
-  background: var(--bg-surface);
+  background: var(--bg-surface-active);
   display: flex;
   flex-direction: column;
   z-index: 5;
@@ -107,6 +107,7 @@
   justify-content: space-between;
   padding: 0 10px;
   border-bottom: 1px solid var(--border-muted);
+  background: var(--bg-surface-active);
 }
 
 .drawerToggleBtn {

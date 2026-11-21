@@ -1,7 +1,7 @@
 .tabsContainer {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .tab {
@@ -14,7 +14,6 @@
   color: var(--text-secondary);
   border-radius: var(--radius-xs);
   transition: all var(--transition-fast);
-  border-bottom: 2px solid transparent;
 }
 
 .tab:hover {
@@ -24,8 +23,7 @@
 
 .active {
   color: var(--accent-color);
-  background: var(--accent-tint-subtle);
-  border-bottom: 2px solid var(--accent-color);
+  background: var(--accent-tint);
   font-weight: 600;
 }
 

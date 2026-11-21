@@ -1,5 +1,5 @@
 .mapCard {
-  background: var(--bg-card);
+  background: var(--bg-surface-active);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xs);
   display: flex;
@@ -7,7 +7,7 @@
 }
 
 .headerBar {
-  background: var(--bg-surface);
+  background: var(--bg-surface-active);
   padding: 8px 12px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
@@ -98,6 +98,4 @@
 .gridContainer {
   padding: 12px;
   overflow-x: auto;
-  background: var(--bg-surface-active);
-  border-top: 1px solid var(--border-color);
 }
