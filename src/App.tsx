@@ -4,6 +4,7 @@ import { TopBar } from './shell/TopBar/TopBar';
 import { NavRail } from './shell/NavRail/NavRail';
 import { ConsolePane } from './shell/ConsolePane/ConsolePane';
 import { ResultsPane } from './shell/ResultsPane/ResultsPane';
+import { BottomDrawer } from './shell/BottomDrawer/BottomDrawer';
 import { SubsystemHost } from './subsystems/SubsystemHost';
 import { useSessionStore } from './store/sessionStore';
 import { sqliteRpc } from './engine/rpc';
@@ -35,6 +36,7 @@ export function App() {
       consolePane={<ConsolePane />}
       resultsPane={<ResultsPane />}
       subsystemPanel={<SubsystemHost />}
+      bottomDrawerContent={<BottomDrawer />}
       footer={
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span>BUDSEI v0.2</span>
