@@ -55,6 +55,14 @@ export const useConsoleStore = create<ConsoleState>((set, get) => ({
         lastTotalChanges: resp.totalChanges,
         errorMessage: null,
       });
+
+      // Refresh storage engine view with new image
+      try {
+        const { useStorageStore } = await import('../subsystems/storage/storageStore');
+        useStorageStore.getState().refreshStorage();
+      } catch {
+        // storage store not loaded yet
+      }
     } catch (err: any) {
       set({
         status: 'error',

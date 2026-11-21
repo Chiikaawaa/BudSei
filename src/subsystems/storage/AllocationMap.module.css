@@ -1,0 +1,101 @@
+.mapCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xs);
+  display: flex;
+  flex-direction: column;
+}
+
+.headerBar {
+  background: var(--bg-surface);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.subtext {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-muted);
+}
+
+.legendGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-secondary);
+}
+
+.legendLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.hiddenCheckbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.customCheckbox {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  transition: all var(--transition-fast);
+}
+
+.leafTable.checked {
+  background: var(--badge-real-text);
+  border-color: var(--badge-real-text);
+}
+
+.interiorTable.checked {
+  background: var(--badge-modeled-text);
+  border-color: var(--badge-modeled-text);
+}
+
+.leafIndex.checked {
+  background: var(--badge-error-text);
+  border-color: var(--badge-error-text);
+}
+
+.interiorIndex.checked {
+  background: var(--badge-emulated-text);
+  border-color: var(--badge-emulated-text);
+}
+
+.freelist.checked {
+  background: var(--text-muted);
+  border-color: var(--text-muted);
+}
+
+.gridContainer {
+  padding: 12px;
+  overflow-x: auto;
+}
