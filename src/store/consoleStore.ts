@@ -18,6 +18,17 @@ interface ConsoleState {
   clearResults: () => void;
 }
 
+// Global subscriber list for query execution events to decouple subsystems
+const executionListeners: (() => void)[] = [];
+
+export function registerExecutionListener(fn: () => void): () => void {
+  executionListeners.push(fn);
+  return () => {
+    const idx = executionListeners.indexOf(fn);
+    if (idx !== -1) executionListeners.splice(idx, 1);
+  };
+}
+
 export const useConsoleStore = create<ConsoleState>((set, get) => ({
   sql: 'SELECT sqlite_version();',
   status: 'ready',
@@ -56,12 +67,13 @@ export const useConsoleStore = create<ConsoleState>((set, get) => ({
         errorMessage: null,
       });
 
-      // Refresh storage engine view with new image
-      try {
-        const { useStorageStore } = await import('../subsystems/storage/storageStore');
-        useStorageStore.getState().refreshStorage();
-      } catch {
-        // storage store not loaded yet
+      // Notify external subscribers
+      for (const listener of executionListeners) {
+        try {
+          listener();
+        } catch {
+          // Ignore listener error
+        }
       }
     } catch (err: any) {
       set({

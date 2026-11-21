@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { sqliteRpc } from '../../engine/rpc';
 import { parseHeader100, SqliteHeader100 } from '../../parsers/header100';
 import { parseBtreePage, ParsedBtreePage } from '../../parsers/btree-page';
+import { registerExecutionListener } from '../../store/consoleStore';
 
 export type PageFilterType = 'TBL-LF' | 'TBL-IN' | 'IDX-LF' | 'IDX-IN' | 'FREE';
 
@@ -91,3 +92,8 @@ export const useStorageStore = create<StorageState>((set, get) => ({
     }
   },
 }));
+
+// Automatically refresh storage on query execution
+registerExecutionListener(() => {
+  useStorageStore.getState().refreshStorage();
+});
