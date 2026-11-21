@@ -7,6 +7,7 @@ import { ResultsPane } from './shell/ResultsPane/ResultsPane';
 import { BottomDrawer } from './shell/BottomDrawer/BottomDrawer';
 import { TheoryDrawer } from './learn/theory-drawer/TheoryDrawer';
 import { CommandPalette } from './shell/CommandPalette';
+import { Cat } from './mascot/Cat';
 import { SubsystemHost } from './subsystems/SubsystemHost';
 import { useSessionStore } from './store/sessionStore';
 import { sqliteRpc } from './engine/rpc';
@@ -50,6 +51,7 @@ export function App() {
       />
       <TheoryDrawer />
       <CommandPalette />
+      <Cat />
     </>
   );
 }
