@@ -15,6 +15,18 @@ export interface LockTransitionResult {
   code?: 'SQLITE_BUSY' | 'SQLITE_LOCKED';
 }
 
+/**
+ * Fast O(1) Matrix Lookup Table for Concurrency Rule Transitions.
+ * Keyed by other connection's current lock -> set of permitted target locks.
+ */
+const PERMITTED_TARGETS_WHEN_OTHER_HAS: Record<LockLevel, Set<LockLevel>> = {
+  UNLOCKED: new Set(['UNLOCKED', 'SHARED', 'RESERVED', 'PENDING', 'EXCLUSIVE']),
+  SHARED: new Set(['UNLOCKED', 'SHARED', 'RESERVED', 'PENDING']), // Cannot acquire EXCLUSIVE while reader exists
+  RESERVED: new Set(['UNLOCKED', 'SHARED', 'PENDING']), // Another connection cannot acquire RESERVED or EXCLUSIVE
+  PENDING: new Set(['UNLOCKED']), // No new readers or writers allowed
+  EXCLUSIVE: new Set(['UNLOCKED']), // Total exclusivity
+};
+
 export class LockStateMachine {
   public connALock: LockLevel = 'UNLOCKED';
   public connBLock: LockLevel = 'UNLOCKED';
@@ -23,69 +35,26 @@ export class LockStateMachine {
     const current = conn === 'A' ? this.connALock : this.connBLock;
     const other = conn === 'A' ? this.connBLock : this.connALock;
 
-    // Release back to UNLOCKED is always allowed
+    // Release to UNLOCKED is unconditionally valid
     if (target === 'UNLOCKED') {
       if (conn === 'A') this.connALock = 'UNLOCKED';
       else this.connBLock = 'UNLOCKED';
       return { ok: true, newLevel: 'UNLOCKED' };
     }
 
-    // Attempt to acquire SHARED (Read)
-    if (target === 'SHARED') {
-      if (other === 'EXCLUSIVE' || other === 'PENDING') {
-        return {
-          ok: false,
-          newLevel: current,
-          error: 'database is locked (other connection holds EXCLUSIVE/PENDING lock)',
-          code: 'SQLITE_BUSY',
-        };
-      }
-      if (conn === 'A') this.connALock = 'SHARED';
-      else this.connBLock = 'SHARED';
-      return { ok: true, newLevel: 'SHARED' };
+    const permitted = PERMITTED_TARGETS_WHEN_OTHER_HAS[other];
+    if (permitted && permitted.has(target)) {
+      if (conn === 'A') this.connALock = target;
+      else this.connBLock = target;
+      return { ok: true, newLevel: target };
     }
 
-    // Attempt to acquire RESERVED (Intent to write)
-    if (target === 'RESERVED') {
-      if (other === 'RESERVED' || other === 'PENDING' || other === 'EXCLUSIVE') {
-        return {
-          ok: false,
-          newLevel: current,
-          error: 'database is locked: another writer holds RESERVED/EXCLUSIVE lock',
-          code: 'SQLITE_BUSY',
-        };
-      }
-      if (conn === 'A') this.connALock = 'RESERVED';
-      else this.connBLock = 'RESERVED';
-      return { ok: true, newLevel: 'RESERVED' };
-    }
-
-    // Attempt to escalate to PENDING
-    if (target === 'PENDING') {
-      if (other === 'EXCLUSIVE') {
-        return { ok: false, newLevel: current, error: 'database is locked', code: 'SQLITE_BUSY' };
-      }
-      if (conn === 'A') this.connALock = 'PENDING';
-      else this.connBLock = 'PENDING';
-      return { ok: true, newLevel: 'PENDING' };
-    }
-
-    // Attempt to escalate to EXCLUSIVE (Full write lock)
-    if (target === 'EXCLUSIVE') {
-      if (other !== 'UNLOCKED') {
-        return {
-          ok: false,
-          newLevel: current,
-          error: 'database is locked: waiting for active readers to clear',
-          code: 'SQLITE_BUSY',
-        };
-      }
-      if (conn === 'A') this.connALock = 'EXCLUSIVE';
-      else this.connBLock = 'EXCLUSIVE';
-      return { ok: true, newLevel: 'EXCLUSIVE' };
-    }
-
-    return { ok: true, newLevel: target };
+    return {
+      ok: false,
+      newLevel: current,
+      error: `database is locked: cannot escalate to ${target} while other connection holds ${other}`,
+      code: 'SQLITE_BUSY',
+    };
   }
 
   public reset() {

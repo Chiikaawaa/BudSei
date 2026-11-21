@@ -132,6 +132,9 @@ export class PagerCacheModel {
   }
 
   private addEvent(type: CacheEvent['type'], pageNo: number, detail: string) {
+    if (this.events.length >= 50) {
+      this.events.pop();
+    }
     this.events.unshift({
       id: this.nextEventId++,
       timestamp: Date.now(),
@@ -139,6 +142,5 @@ export class PagerCacheModel {
       pageNo,
       detail,
     });
-    if (this.events.length > 50) this.events.pop();
   }
 }
