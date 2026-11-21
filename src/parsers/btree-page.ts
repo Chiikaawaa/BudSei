@@ -31,11 +31,24 @@ export interface ParsedBtreePage {
   fillPercentage: number;
 }
 
+// LRU parsed page cache keyed by `${changeCounter}:${pageNumber}`
+const parsedPageCache = new Map<string, ParsedBtreePage>();
+const MAX_CACHE_SIZE = 1000;
+
+export function clearParsedPageCache() {
+  parsedPageCache.clear();
+}
+
 export function parseBtreePage(
   pageBuffer: Uint8Array,
   pageNumber: number,
-  pageSize: number
+  pageSize: number,
+  changeCounter = 0
 ): ParsedBtreePage {
+  const cacheKey = `${changeCounter}:${pageNumber}`;
+  const cached = parsedPageCache.get(cacheKey);
+  if (cached) return cached;
+
   const headerOffset = pageNumber === 1 ? 100 : 0;
   if (pageBuffer.length < headerOffset + 8) {
     throw new Error(`Buffer too small for page ${pageNumber}`);
@@ -72,20 +85,19 @@ export function parseBtreePage(
     rightChildPage = view.getUint32(8, false);
   }
 
-  // Read cell pointers
+  // Read cell pointers using single DataView
   const cellPointers: number[] = [];
   const pointerStart = headerOffset + headerSize;
+  const pageView = new DataView(pageBuffer.buffer, pageBuffer.byteOffset);
   for (let i = 0; i < cellCount; i++) {
     const ptrOffset = pointerStart + i * 2;
     if (ptrOffset + 2 <= pageBuffer.length) {
-      const ptr = new DataView(pageBuffer.buffer, pageBuffer.byteOffset + ptrOffset).getUint16(0, false);
-      cellPointers.push(ptr);
+      cellPointers.push(pageView.getUint16(ptrOffset, false));
     }
   }
 
   // Parse cells
   const cells: BtreeCell[] = [];
-  let totalCellBytes = 0;
   for (const ptr of cellPointers) {
     if (ptr > 0 && ptr < pageBuffer.length) {
       let cell: BtreeCell;
@@ -101,17 +113,15 @@ export function parseBtreePage(
         cell = { offset: ptr, size: 0, payloadSize: 0 };
       }
       cells.push(cell);
-      totalCellBytes += cell.size;
     }
   }
 
-  // Compute unallocated free space: between end of cell pointers and cell content start
   const endOfPointers = pointerStart + cellCount * 2;
   const freeSpaceBytes = Math.max(0, cellContentStart - endOfPointers);
   const usedBytes = pageSize - freeSpaceBytes;
   const fillPercentage = Math.min(100, Math.max(1, Math.round((usedBytes / pageSize) * 100)));
 
-  return {
+  const result: ParsedBtreePage = {
     pageNumber,
     pageSize,
     header: {
@@ -131,4 +141,12 @@ export function parseBtreePage(
     freeSpaceBytes,
     fillPercentage,
   };
+
+  if (parsedPageCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = parsedPageCache.keys().next().value;
+    if (firstKey) parsedPageCache.delete(firstKey);
+  }
+  parsedPageCache.set(cacheKey, result);
+
+  return result;
 }

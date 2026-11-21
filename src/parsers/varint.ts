@@ -1,8 +1,6 @@
 /**
- * SQLite variable-length integer (varint) decoder and encoder.
- * Varints in SQLite are 1 to 9 bytes long.
- * First 8 bytes: 7 bits of payload, high bit indicates if more bytes follow.
- * 9th byte: all 8 bits are payload.
+ * SQLite variable-length integer (varint) decoder.
+ * High-performance implementation with 1-byte and 2-byte inline fast paths.
  */
 
 export interface VarintResult {
@@ -11,8 +9,23 @@ export interface VarintResult {
 }
 
 export function readVarint(buffer: Uint8Array, offset: number): VarintResult {
-  let val = 0;
-  for (let i = 0; i < 8; i++) {
+  const b0 = buffer[offset];
+  if (b0 === undefined) return { value: 0, bytesRead: 0 };
+
+  // 1-byte fast path (~80% of all varints)
+  if ((b0 & 0x80) === 0) {
+    return { value: b0, bytesRead: 1 };
+  }
+
+  // 2-byte fast path (~15% of all varints)
+  const b1 = buffer[offset + 1];
+  if (b1 !== undefined && (b1 & 0x80) === 0) {
+    return { value: ((b0 & 0x7f) << 7) | b1, bytesRead: 2 };
+  }
+
+  // Multi-byte fallback (3 to 9 bytes)
+  let val = ((b0 & 0x7f) << 7) | ((b1 ?? 0) & 0x7f);
+  for (let i = 2; i < 8; i++) {
     if (offset + i >= buffer.length) {
       return { value: val, bytesRead: i };
     }
