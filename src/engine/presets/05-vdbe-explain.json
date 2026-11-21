@@ -1,0 +1,5 @@
+{
+  "id": "vdbe-explain",
+  "label": "5. VDBE Bytecode Disassembly",
+  "sql": "-- Disassemble SQLite Virtual Machine instructions (EXPLAIN)\nEXPLAIN \nSELECT id, username, balance FROM users WHERE id = 10;"
+}

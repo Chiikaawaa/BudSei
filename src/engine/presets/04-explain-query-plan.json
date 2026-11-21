@@ -1,0 +1,5 @@
+{
+  "id": "explain-plan",
+  "label": "4. EXPLAIN QUERY PLAN",
+  "sql": "-- Compare scan vs indexed search paths\nEXPLAIN QUERY PLAN \nSELECT * FROM users WHERE email = 'user_042@budsei.internal';\n\nEXPLAIN QUERY PLAN \nSELECT * FROM users WHERE balance > 50.0;"
+}

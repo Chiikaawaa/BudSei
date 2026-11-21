@@ -1,0 +1,5 @@
+{
+  "id": "wal-toggle",
+  "label": "8. PRAGMA & Journal Mode",
+  "sql": "-- Inspect internal pragmas and toggle journal mode\nPRAGMA journal_mode;\nPRAGMA page_size;\nPRAGMA page_count;\nPRAGMA freelist_count;\nPRAGMA user_version;"
+}

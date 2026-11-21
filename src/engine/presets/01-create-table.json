@@ -1,0 +1,5 @@
+{
+  "id": "create-table",
+  "label": "1. Create Table (Users)",
+  "sql": "-- Create a user accounts table with primary key and constraints\nCREATE TABLE users (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  username TEXT NOT NULL UNIQUE,\n  email TEXT NOT NULL,\n  balance REAL DEFAULT 0.0,\n  created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n);\n\nSELECT name, sql FROM sqlite_schema WHERE type='table';"
+}

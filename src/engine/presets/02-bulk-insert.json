@@ -1,0 +1,5 @@
+{
+  "id": "bulk-insert",
+  "label": "2. Bulk Insert (Recursive CTE)",
+  "sql": "-- Insert 100 records using recursive Common Table Expression\nINSERT INTO users (username, email, balance)\nWITH RECURSIVE generate_users(i) AS (\n  SELECT 1\n  UNION ALL\n  SELECT i + 1 FROM generate_users WHERE i < 100\n)\nSELECT \n  'user_' || printf('%03d', i),\n  'user_' || printf('%03d', i) || '@budsei.internal',\n  round(abs(random() % 10000) / 100.0, 2)\nFROM generate_users;\n\nSELECT count(*), avg(balance) FROM users;"
+}

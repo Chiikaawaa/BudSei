@@ -1,0 +1,5 @@
+{
+  "id": "create-index",
+  "label": "3. Create B-Tree Index",
+  "sql": "-- Create secondary index on email to accelerate lookups\nCREATE INDEX idx_users_email ON users(email);\n\n-- Inspect sqlite_schema to confirm rootpage allocation\nSELECT type, name, tbl_name, rootpage FROM sqlite_schema;"
+}

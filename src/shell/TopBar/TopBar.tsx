@@ -6,12 +6,14 @@ import { Kbd } from '../../ui/Kbd';
 import { useSessionStore } from '../../store/sessionStore';
 import { useUiStore } from '../../store/uiStore';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useConsoleStore } from '../../store/consoleStore';
 
 export const TopBar = React.memo(function TopBar() {
   const { pageSize, pageCount, dbName, connectionMode, toggleConnectionMode, isExecuting } =
     useSessionStore();
   const { toggleTheoryDrawer, setCommandPaletteOpen } = useUiStore();
   const { toggleTheme } = useSettingsStore();
+  const execute = useConsoleStore((s) => s.execute);
 
   return (
     <div className={styles.topBar}>
@@ -51,6 +53,7 @@ export const TopBar = React.memo(function TopBar() {
           className={styles.execBtn}
           title="Execute SQL query (Cmd+Enter)"
           disabled={isExecuting}
+          onClick={execute}
         >
           <span>Execute</span>
           <Kbd>⌘↵</Kbd>

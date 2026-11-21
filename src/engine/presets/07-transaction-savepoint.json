@@ -1,0 +1,5 @@
+{
+  "id": "transactions",
+  "label": "7. ACID Transaction & Savepoint",
+  "sql": "-- Atomic transaction with savepoint rollback\nBEGIN TRANSACTION;\nUPDATE users SET balance = balance - 50.0 WHERE id = 1;\nSAVEPOINT sp1;\nUPDATE users SET balance = balance + 50.0 WHERE id = 2;\nROLLBACK TO sp1;\nCOMMIT;\n\nSELECT id, username, balance FROM users WHERE id IN (1, 2);"
+}

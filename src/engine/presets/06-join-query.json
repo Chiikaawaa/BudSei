@@ -1,0 +1,5 @@
+{
+  "id": "join-query",
+  "label": "6. Foreign Keys & Joins",
+  "sql": "-- Relational joins across tables\nCREATE TABLE orders (\n  order_id INTEGER PRIMARY KEY,\n  user_id INTEGER REFERENCES users(id),\n  amount REAL NOT NULL\n);\n\nINSERT INTO orders (user_id, amount) VALUES (1, 99.99), (1, 14.50), (2, 250.00);\n\nSELECT u.username, o.order_id, o.amount \nFROM users u \nJOIN orders o ON u.id = o.user_id;"
+}
