@@ -7,6 +7,9 @@ import { PlanTree, PlanNode } from './PlanTree';
 import { sqliteRpc } from '../../engine/rpc';
 import { useConsoleStore } from '../../store/consoleStore';
 
+// Hash-keyed memoization cache for EXPLAIN and EXPLAIN QUERY PLAN
+const explainCache = new Map<string, { instructions: VdbeInstruction[]; planNodes: PlanNode[]; cursors: CursorState[] }>();
+
 export function QueryView() {
   const consoleSql = useConsoleStore((s) => s.sql);
   const [queryInput, setQueryInput] = useState<string>('SELECT * FROM users WHERE id = 10;');
@@ -22,6 +25,16 @@ export function QueryView() {
   const analyzeQuery = useCallback(async (sqlToRun: string) => {
     const rawSql = sqlToRun.trim().replace(/^EXPLAIN\s+(QUERY\s+PLAN\s+)?/i, '');
     if (!rawSql) return;
+
+    // Check memo cache first
+    const cached = explainCache.get(rawSql);
+    if (cached) {
+      setInstructions(cached.instructions);
+      setPlanNodes(cached.planNodes);
+      setCursors(cached.cursors);
+      setCurrentAddr(cached.instructions[0]?.addr ?? 0);
+      return;
+    }
 
     try {
       // 1. Run EXPLAIN
@@ -63,6 +76,9 @@ export function QueryView() {
         detail: String(r[3] ?? r[2] ?? ''),
       }));
       setPlanNodes(nodes);
+
+      // Cache result
+      explainCache.set(rawSql, { instructions: insts, planNodes: nodes, cursors: parsedCursors });
     } catch (err) {
       console.error('Failed to explain query:', err);
     }
