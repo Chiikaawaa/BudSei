@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Badge } from '../../ui/Badge';
 import { StatCards } from './StatCards';
 import { AllocationMap } from './AllocationMap';
+import { PageDetail } from './PageDetail';
 import { useStorageStore } from './storageStore';
 
 export function StorageView() {
@@ -29,6 +30,9 @@ export function StorageView() {
 
       {/* Physical Page Allocation Map */}
       <AllocationMap />
+
+      {/* Selected Page Detail (ByteBar, Headers, Cells) */}
+      <PageDetail />
     </div>
   );
 }

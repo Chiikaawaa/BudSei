@@ -1,0 +1,108 @@
+.byteBarWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.offsetLabelsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-muted);
+  padding: 0 2px;
+}
+
+.offsetLabel {
+  text-align: left;
+}
+
+.offsetLabelCenter {
+  text-align: center;
+  color: var(--accent-color);
+}
+
+.offsetLabelRight {
+  text-align: right;
+}
+
+.barTrack {
+  height: 46px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xs);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+}
+
+.segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
+.segment:hover {
+  opacity: 0.85;
+}
+
+.segHd {
+  background: #3b82f6;
+  color: #ffffff;
+  border-right: 1px solid var(--border-color);
+}
+
+.segTr {
+  background: #f59e0b;
+  color: #ffffff;
+  border-right: 1px solid var(--border-color);
+}
+
+.segCp {
+  background: #8b5cf6;
+  color: #ffffff;
+  border-right: 1px solid var(--border-color);
+}
+
+.segFree {
+  background: var(--bg-surface-active);
+  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+  font-weight: 600;
+}
+
+.segCells {
+  background: #10b981;
+  color: #ffffff;
+  border-left: 1px solid var(--border-color);
+}
+
+.segIt {
+  width: 20px;
+  background: #ec4899;
+  color: #ffffff;
+  border-left: 1px solid var(--border-color);
+}
+
+.hoverTooltip {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-secondary);
+  background: var(--bg-surface-active);
+  border: 1px solid var(--border-color);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  width: fit-content;
+}
