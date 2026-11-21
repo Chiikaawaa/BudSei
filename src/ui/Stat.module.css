@@ -1,0 +1,36 @@
+.statCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  flex: 1;
+}
+
+.withAccent {
+  border-top: 3px solid var(--accent-color);
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+  font-feature-settings: 'zero' 1;
+  font-variant-numeric: slashed-zero tabular-nums;
+}
+
+.label {
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  border-bottom: 1px dotted var(--border-color);
+  width: fit-content;
+  cursor: help;
+}
