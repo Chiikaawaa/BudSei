@@ -1,10 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, Suspense, lazy } from 'react';
 import styles from './ConsolePane.module.css';
 import { Select } from '../../ui/Select';
 import { Badge } from '../../ui/Badge';
-import { SqlEditor } from './SqlEditor';
 import { useConsoleStore } from '../../store/consoleStore';
 import { SQL_PRESETS } from '../../engine/presets';
+
+const SqlEditor = lazy(() =>
+  import('./SqlEditor').then((mod) => ({ default: mod.SqlEditor }))
+);
 
 export const ConsolePane = React.memo(function ConsolePane() {
   const { sql, status, setSql, loadPreset, execute } = useConsoleStore();
@@ -39,7 +42,15 @@ export const ConsolePane = React.memo(function ConsolePane() {
         </div>
       </div>
       <div className={styles.editorArea}>
-        <SqlEditor value={sql} onChange={setSql} onExecute={execute} />
+        <Suspense
+          fallback={
+            <div style={{ padding: '12px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '11px' }}>
+              Loading SQL Editor…
+            </div>
+          }
+        >
+          <SqlEditor value={sql} onChange={setSql} onExecute={execute} />
+        </Suspense>
       </div>
     </div>
   );

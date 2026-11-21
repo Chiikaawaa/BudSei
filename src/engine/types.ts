@@ -1,6 +1,7 @@
 export interface QueryResult {
   columns: string[];
   rows: (string | number | null | Uint8Array)[][];
+  columnsData?: (string | number | null | Uint8Array)[][];
   changes?: number;
   lastInsertRowid?: number;
 }

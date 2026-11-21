@@ -4,6 +4,7 @@ import styles from './ResultTable.module.css';
 interface ResultTableProps {
   columns: string[];
   rows: (string | number | null | Uint8Array)[][];
+  columnsData?: (string | number | null | Uint8Array)[][];
   rowHeight?: number;
 }
 

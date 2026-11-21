@@ -58,6 +58,21 @@ function handleExec(sql: string) {
         }
       },
     });
+
+    // For large result sets (> 100 rows), build columnar data to reduce structured clone overhead
+    for (const res of results) {
+      if (res.rows.length > 100 && res.columns.length > 0) {
+        const colCount = res.columns.length;
+        const columnsData: any[][] = Array.from({ length: colCount }, () => []);
+        for (let r = 0; r < res.rows.length; r++) {
+          const row = res.rows[r]!;
+          for (let c = 0; c < colCount; c++) {
+            columnsData[c]!.push(row[c]);
+          }
+        }
+        res.columnsData = columnsData;
+      }
+    }
   }
 
   const durationMs = Math.round((performance.now() - t0) * 100) / 100;
