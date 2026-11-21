@@ -1,0 +1,77 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 12px;
+  gap: 12px;
+}
+
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brandSlash {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.brandSub {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.badgeGroup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.centerPill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+  background: var(--bg-surface-active);
+  border: 1px solid var(--border-color);
+  padding: 3px 10px;
+  border-radius: var(--radius-xs);
+}
+
+.greenDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--badge-real-text);
+  box-shadow: 0 0 5px var(--badge-real-text);
+}
+
+.rightCluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.execBtn {
+  gap: 6px;
+}
+
+.iconBtn {
+  padding: 4px 8px;
+  font-size: 13px;
+}
