@@ -13,12 +13,24 @@ export interface DbSnapshot {
   pageSize: number;
   freelistCount: number;
   journalMode: string;
-  image: Uint8Array;
+  pageHashes: string[];
+}
+
+// Global content-addressable page pool for copy-on-write structural sharing
+const pagePool = new Map<string, Uint8Array>();
+
+function hashPageBuffer(buf: Uint8Array): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < buf.length; i += 32) {
+    h ^= buf[i]!;
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
 }
 
 interface SnapshotState {
   snapshots: DbSnapshot[];
-  activeSnapshotId: number | null; // null = live, number = scrubbing
+  activeSnapshotId: number | null;
   addSnapshot: (snapshot: DbSnapshot) => void;
   scrubTo: (id: number | null) => void;
   restoreLive: (id: number) => Promise<void>;
@@ -42,10 +54,8 @@ export const useSnapshotStore = create<SnapshotState>((set, get) => ({
     const snap = get().snapshots.find((s) => s.id === id);
     if (!snap) return;
 
-    // Reset live DB and apply snapshot state
     try {
       await sqliteRpc.reset();
-      // Apply page size and settings
       const session = useSessionStore.getState();
       session.setPageStats(snap.pageSize, snap.pageCount, snap.freelistCount);
       session.setJournalMode(snap.journalMode);
@@ -55,10 +65,12 @@ export const useSnapshotStore = create<SnapshotState>((set, get) => ({
     }
   },
 
-  clearHistory: () => set({ snapshots: [], activeSnapshotId: null }),
+  clearHistory: () => {
+    pagePool.clear();
+    set({ snapshots: [], activeSnapshotId: null });
+  },
 }));
 
-// Capture snapshot automatically after query executions
 registerExecutionListener(async () => {
   try {
     const consoleState = useConsoleStore.getState();
@@ -66,6 +78,19 @@ registerExecutionListener(async () => {
     const image = await sqliteRpc.export();
 
     if (image && image.length > 0) {
+      const pageSize = sessionState.pageSize || 8192;
+      const pageCount = Math.max(1, Math.floor(image.length / pageSize));
+      const pageHashes: string[] = [];
+
+      for (let p = 0; p < pageCount; p++) {
+        const pageBuf = image.subarray(p * pageSize, (p + 1) * pageSize);
+        const hash = hashPageBuffer(pageBuf);
+        if (!pagePool.has(hash)) {
+          pagePool.set(hash, pageBuf);
+        }
+        pageHashes.push(hash);
+      }
+
       useSnapshotStore.getState().addSnapshot({
         id: nextSnapshotId++,
         timestamp: Date.now(),
@@ -76,7 +101,7 @@ registerExecutionListener(async () => {
         pageSize: sessionState.pageSize,
         freelistCount: sessionState.freelistCount,
         journalMode: sessionState.journalMode,
-        image,
+        pageHashes,
       });
     }
   } catch (err) {
