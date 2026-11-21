@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { Badge } from '../../ui/Badge';
 import { StatCards } from './StatCards';
 import { AllocationMap } from './AllocationMap';
 import { PageDetail } from './PageDetail';
@@ -14,14 +13,34 @@ export function StorageView() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
-      {/* Title Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <Badge variant="accent">SUBSYSTEM // STORAGE ENGINE</Badge>
-        <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em' }}>
+      {/* Title Header matching UI spec and screenshot */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--accent-color)',
+          }}
+        >
+          SUBSYSTEM // STORAGE ENGINE
+        </span>
+        <h2
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '15px',
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--text-primary)',
+          }}
+        >
           STORAGE ENGINE
         </h2>
       </div>
-      <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '-8px' }}>
         Physical page allocation, 100-byte database header, slotted-page architectures, and decoded record payloads.
       </p>
 

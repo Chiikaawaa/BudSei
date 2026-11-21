@@ -17,14 +17,14 @@ export const StatCards = React.memo(function StatCards() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div style={{ display: 'flex', gap: '12px' }}>
-        <Stat value={`${pageSizeKb} KB`} label="PAGE SIZE" tooltip="Database page size in bytes" />
-        <Stat value={effPageCount} label="PAGE COUNT" tooltip="Total allocated pages in file" />
-        <Stat value={`${totalFileSizeKb} KB`} label="TOTAL FILE SIZE" tooltip="Calculated as page_size * page_count" />
-        <Stat value={effFreelist} label="FREELIST" tooltip="Number of unallocated free pages" />
+        <Stat value={`${pageSizeKb} KB`} label="PAGE SIZE" tooltip="Database page size in bytes" accentBorder={true} />
+        <Stat value={effPageCount} label="PAGE COUNT" tooltip="Total allocated pages in file" accentBorder={false} />
+        <Stat value={`${totalFileSizeKb} KB`} label="TOTAL FILE SIZE" tooltip="Calculated as page_size * page_count" accentBorder={false} />
+        <Stat value={effFreelist} label="FREELIST" tooltip="Number of unallocated free pages" accentBorder={false} />
       </div>
 
       <div style={{ width: '220px' }}>
-        <Stat value={journalMode} label="JOURNAL MODE" tooltip="Active SQLite transaction journal mode" accentBorder={false} />
+        <Stat value={journalMode} label="JOURNAL MODE" tooltip="Active SQLite transaction journal mode" accentBorder={true} />
       </div>
     </div>
   );

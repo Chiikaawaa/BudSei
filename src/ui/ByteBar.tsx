@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './ByteBar.module.css';
 import { ParsedBtreePage } from '../parsers/btree-page';
 import { findCellAtOffset } from './bytebar-utils';
+import { useSettingsStore } from '../store/settingsStore';
 
 interface ByteBarProps {
   page: ParsedBtreePage;
@@ -11,6 +12,7 @@ interface ByteBarProps {
 export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: ByteBarProps) {
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { theme } = useSettingsStore();
   const pageSize = page.pageSize;
   const isPage1 = page.pageNumber === 1;
 
@@ -23,7 +25,6 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
   const hexEnd = `0x${(page.pageNumber * pageSize).toString(16).padStart(4, '0').toUpperCase()}`;
   const hexTree = isPage1 ? '0x0064' : hexStart;
 
-  // Draw high-density canvas for instant <16ms 5k-cell render
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -34,34 +35,72 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
     const height = canvas.height;
     ctx.clearRect(0, 0, width, height);
 
+    const isLight = theme === 'light';
     const xHd = (hdSize / pageSize) * width;
     const xTr = ((hdSize + trSize) / pageSize) * width;
     const xCp = ((hdSize + trSize + cpSize) / pageSize) * width;
     const xContent = (cellContentStart / pageSize) * width;
 
-    // HD
+    // 1. SQLite File Header (HD)
     if (hdSize > 0) {
       ctx.fillStyle = '#3b82f6';
       ctx.fillRect(0, 0, xHd, height);
+      if (xHd > 14) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('HD', xHd / 2, height / 2);
+      }
     }
-    // TR
+
+    // 2. B-Tree Page Header (TR)
     ctx.fillStyle = '#f59e0b';
     ctx.fillRect(xHd, 0, xTr - xHd, height);
-    // CP
+    if (xTr - xHd > 14) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('TR', xHd + (xTr - xHd) / 2, height / 2);
+    }
+
+    // 3. Cell Pointer Array (CP)
     if (cpSize > 0) {
       ctx.fillStyle = '#8b5cf6';
       ctx.fillRect(xTr, 0, xCp - xTr, height);
+      if (xCp - xTr > 16) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 9px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('CP', xTr + (xCp - xTr) / 2, height / 2);
+      }
     }
-    // Free space
-    ctx.fillStyle = '#1e1e24';
-    ctx.fillRect(xCp, 0, xContent - xCp, height);
-    // Cells
-    ctx.fillStyle = '#10b981';
-    ctx.fillRect(xContent, 0, width - xContent - 2, height);
-    // Tail IT
+
+    // 4. Unallocated Free Space
+    ctx.fillStyle = isLight ? '#eae5dc' : '#1c1c22';
+    const freeWidth = Math.max(0, xContent - xCp);
+    ctx.fillRect(xCp, 0, freeWidth, height);
+
+    if (freeWidth > 120) {
+      ctx.fillStyle = isLight ? '#6e6962' : '#8e8e9f';
+      ctx.font = '10px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`UNALLOCATED FREE (${page.freeSpaceBytes} B)`, xCp + freeWidth / 2, height / 2);
+    }
+
+    // 5. Cell Content Area
+    if (width > xContent) {
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(xContent, 0, width - xContent - 2, height);
+    }
+
+    // 6. Tail indicator
     ctx.fillStyle = '#ec4899';
-    ctx.fillRect(width - 20, 0, 20, height);
-  }, [hdSize, trSize, cpSize, cellContentStart, pageSize]);
+    ctx.fillRect(width - 6, 0, 6, height);
+  }, [hdSize, trSize, cpSize, cellContentStart, pageSize, theme, page.freeSpaceBytes]);
 
   useEffect(() => {
     drawCanvas();

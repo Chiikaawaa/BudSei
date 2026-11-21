@@ -98,4 +98,6 @@
 .gridContainer {
   padding: 12px;
   overflow-x: auto;
+  background: var(--bg-surface-active);
+  border-top: 1px solid var(--border-color);
 }

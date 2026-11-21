@@ -80,7 +80,7 @@ export const TopBar = React.memo(function TopBar() {
           onClick={toggleTheme}
           title="Menu / Settings (Toggle Dark/Light Theme)"
         >
-          Menu ▾
+          ≡ Menu ▾
         </Button>
 
         <Button
@@ -89,7 +89,7 @@ export const TopBar = React.memo(function TopBar() {
           onClick={toggleTheoryDrawer}
           title="Why // Database Theory"
         >
-          📖
+          ◨
         </Button>
       </div>
     </div>

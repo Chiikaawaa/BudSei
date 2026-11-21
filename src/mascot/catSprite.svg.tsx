@@ -6,7 +6,10 @@ export function CatSprite() {
       viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ overflow: 'visible', filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.2))' }}
+      style={{
+        overflow: 'visible',
+        filter: 'drop-shadow(0 0 6px var(--accent-color)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+      }}
     >
       {/* Body & Head */}
       <path
