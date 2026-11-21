@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './ByteBar.module.css';
 import { ParsedBtreePage } from '../parsers/btree-page';
+import { findCellAtOffset } from './bytebar-utils';
 
 interface ByteBarProps {
   page: ParsedBtreePage;
@@ -9,6 +10,7 @@ interface ByteBarProps {
 
 export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: ByteBarProps) {
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const pageSize = page.pageSize;
   const isPage1 = page.pageNumber === 1;
 
@@ -16,93 +18,105 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
   const trSize = page.header.headerSize;
   const cpSize = page.cellPointers.length * 2;
   const cellContentStart = page.header.cellContentStart;
-  const totalCellBytes = pageSize - cellContentStart;
-  const freeSpace = Math.max(0, cellContentStart - (hdSize + trSize + cpSize));
 
-  const toPct = (bytes: number) => `${Math.max(0.5, (bytes / pageSize) * 100)}%`;
   const hexStart = `0x${((page.pageNumber - 1) * pageSize).toString(16).padStart(4, '0').toUpperCase()}`;
   const hexEnd = `0x${(page.pageNumber * pageSize).toString(16).padStart(4, '0').toUpperCase()}`;
   const hexTree = isPage1 ? '0x0064' : hexStart;
 
+  // Draw high-density canvas for instant <16ms 5k-cell render
+  const drawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+
+    const xHd = (hdSize / pageSize) * width;
+    const xTr = ((hdSize + trSize) / pageSize) * width;
+    const xCp = ((hdSize + trSize + cpSize) / pageSize) * width;
+    const xContent = (cellContentStart / pageSize) * width;
+
+    // HD
+    if (hdSize > 0) {
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(0, 0, xHd, height);
+    }
+    // TR
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(xHd, 0, xTr - xHd, height);
+    // CP
+    if (cpSize > 0) {
+      ctx.fillStyle = '#8b5cf6';
+      ctx.fillRect(xTr, 0, xCp - xTr, height);
+    }
+    // Free space
+    ctx.fillStyle = '#1e1e24';
+    ctx.fillRect(xCp, 0, xContent - xCp, height);
+    // Cells
+    ctx.fillStyle = '#10b981';
+    ctx.fillRect(xContent, 0, width - xContent - 2, height);
+    // Tail IT
+    ctx.fillStyle = '#ec4899';
+    ctx.fillRect(width - 20, 0, 20, height);
+  }, [hdSize, trSize, cpSize, cellContentStart, pageSize]);
+
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const ratio = clickX / rect.width;
+      const offset = Math.floor(ratio * pageSize);
+
+      if (offset < hdSize) {
+        setHoveredInfo(`HD: File Header (0x${offset.toString(16).padStart(2, '0')})`);
+      } else if (offset < hdSize + trSize) {
+        setHoveredInfo(`TR: B-Tree Page Header (0x${offset.toString(16)})`);
+      } else if (offset < hdSize + trSize + cpSize) {
+        setHoveredInfo(`CP: Cell Pointer Area (0x${offset.toString(16)})`);
+      } else if (offset < cellContentStart) {
+        setHoveredInfo(`Unallocated Free Space: ${page.freeSpaceBytes} B`);
+      } else {
+        const found = findCellAtOffset(page.cells, offset);
+        if (found) {
+          setHoveredInfo(`Cell at 0x${found.offset.toString(16)} (Size: ${found.size}B, RowID: ${found.rowid ?? 'idx'})`);
+        } else {
+          setHoveredInfo(`Cell Content Area (0x${offset.toString(16)})`);
+        }
+      }
+    },
+    [hdSize, trSize, cpSize, cellContentStart, page.freeSpaceBytes, page.cells, pageSize]
+  );
+
   return (
     <div className={styles.byteBarWrapper}>
-      {/* Non-overlapping clean offset labels above */}
       <div className={styles.offsetLabelsRow}>
         <span className={styles.offsetLabel}>{hexStart}</span>
         {isPage1 && <span className={styles.offsetLabelCenter}>{hexTree}</span>}
         <span className={styles.offsetLabelRight}>{hexEnd}</span>
       </div>
 
-      {/* Main Byte Bar Container */}
       <div className={styles.barTrack}>
-        {/* HD: File Header (Page 1 only) */}
-        {isPage1 && (
-          <div
-            className={`${styles.segment} ${styles.segHd}`}
-            style={{ width: toPct(hdSize) }}
-            onClick={() => onSelectSegment?.('100-Byte File Header', 0, 100)}
-            onMouseEnter={() => setHoveredInfo('HD: SQLite 100-byte file header (0x0000 - 0x0064)')}
-            onMouseLeave={() => setHoveredInfo(null)}
-          >
-            HD
-          </div>
-        )}
-
-        {/* TR: Tree Page Header */}
-        <div
-          className={`${styles.segment} ${styles.segTr}`}
-          style={{ width: toPct(trSize) }}
-          onClick={() => onSelectSegment?.('B-Tree Page Header', hdSize, hdSize + trSize)}
-          onMouseEnter={() => setHoveredInfo(`TR: B-Tree header (${trSize} bytes at 0x${hdSize.toString(16)})`)}
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={46}
+          style={{ width: '100%', height: '100%', display: 'block', cursor: 'crosshair' }}
+          onMouseMove={handleMouseMove}
           onMouseLeave={() => setHoveredInfo(null)}
-        >
-          TR
-        </div>
-
-        {/* CP: Cell Pointer Array */}
-        {cpSize > 0 && (
-          <div
-            className={`${styles.segment} ${styles.segCp}`}
-            style={{ width: toPct(cpSize) }}
-            onClick={() => onSelectSegment?.('Cell Pointer Array', hdSize + trSize, hdSize + trSize + cpSize)}
-            onMouseEnter={() => setHoveredInfo(`CP: Cell pointers (${page.cellPointers.length} pointers, ${cpSize} bytes)`)}
-            onMouseLeave={() => setHoveredInfo(null)}
-          >
-            CP
-          </div>
-        )}
-
-        {/* Center: Unallocated Free Gap */}
-        <div
-          className={`${styles.segment} ${styles.segFree}`}
-          style={{ flex: 1 }}
-          onClick={() => onSelectSegment?.('Unallocated Free Space', hdSize + trSize + cpSize, cellContentStart)}
-          onMouseEnter={() => setHoveredInfo(`Unallocated gap: ${freeSpace} bytes between cell pointers & content`)}
-          onMouseLeave={() => setHoveredInfo(null)}
-        >
-          UNALLOCATED FREE ({page.freeSpaceBytes} B)
-        </div>
-
-        {/* Cells Area (Filling backwards) */}
-        {totalCellBytes > 0 && (
-          <div
-            className={`${styles.segment} ${styles.segCells}`}
-            style={{ width: toPct(totalCellBytes) }}
-            onClick={() => onSelectSegment?.('Cell Payloads Area', cellContentStart, pageSize)}
-            onMouseEnter={() => setHoveredInfo(`Cells: ${page.cells.length} cells (${totalCellBytes} bytes)`)}
-            onMouseLeave={() => setHoveredInfo(null)}
-          >
-            {page.cells.length > 0 ? `${page.cells.length} CELLS` : 'CELLS'}
-          </div>
-        )}
-
-        {/* IT: Tail / Content Start marker */}
-        <div
-          className={`${styles.segment} ${styles.segIt}`}
-          title={`Cell content start: 0x${cellContentStart.toString(16).toUpperCase()}`}
-        >
-          IT
-        </div>
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const ratio = (e.clientX - rect.left) / rect.width;
+            const off = Math.floor(ratio * pageSize);
+            onSelectSegment?.('Selected Byte Range', Math.max(0, off - 32), Math.min(pageSize, off + 32));
+          }}
+        />
       </div>
 
       {hoveredInfo && <div className={styles.hoverTooltip}>{hoveredInfo}</div>}
