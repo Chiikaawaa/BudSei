@@ -5,6 +5,8 @@ import { NavRail } from './shell/NavRail/NavRail';
 import { ConsolePane } from './shell/ConsolePane/ConsolePane';
 import { ResultsPane } from './shell/ResultsPane/ResultsPane';
 import { BottomDrawer } from './shell/BottomDrawer/BottomDrawer';
+import { TheoryDrawer } from './learn/theory-drawer/TheoryDrawer';
+import { CommandPalette } from './shell/CommandPalette';
 import { SubsystemHost } from './subsystems/SubsystemHost';
 import { useSessionStore } from './store/sessionStore';
 import { sqliteRpc } from './engine/rpc';
@@ -30,20 +32,24 @@ export function App() {
   }, [setSqliteVersion, setPageStats, setJournalMode]);
 
   return (
-    <AppLayout
-      topBar={<TopBar />}
-      navRail={<NavRail />}
-      consolePane={<ConsolePane />}
-      resultsPane={<ResultsPane />}
-      subsystemPanel={<SubsystemHost />}
-      bottomDrawerContent={<BottomDrawer />}
-      footer={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span>BUDSEI v0.2</span>
-          <span>•</span>
-          <span>SQLITE {sqliteVersion} WASM</span>
-        </div>
-      }
-    />
+    <>
+      <AppLayout
+        topBar={<TopBar />}
+        navRail={<NavRail />}
+        consolePane={<ConsolePane />}
+        resultsPane={<ResultsPane />}
+        subsystemPanel={<SubsystemHost />}
+        bottomDrawerContent={<BottomDrawer />}
+        footer={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>BUDSEI v0.2</span>
+            <span>•</span>
+            <span>SQLITE {sqliteVersion} WASM</span>
+          </div>
+        }
+      />
+      <TheoryDrawer />
+      <CommandPalette />
+    </>
   );
 }
