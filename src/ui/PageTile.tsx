@@ -31,7 +31,7 @@ export const PageTile = React.memo(function PageTile({
 
   return (
     <div
-      className={`${styles.pageTile} ${isSelected ? styles.selected : ''}`}
+      className={`${styles.pageTile} ${typeClass} ${isSelected ? styles.selected : ''}`}
       onClick={onClick}
       role="button"
       tabIndex={0}

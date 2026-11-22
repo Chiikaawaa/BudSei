@@ -71,6 +71,7 @@ function handleExec(sql: string) {
           }
         }
         res.columnsData = columnsData;
+        res.rows = [];
       }
     }
   }
@@ -107,6 +108,26 @@ self.onmessage = async (event: MessageEvent<RpcRequest>) => {
         const buffer = handleExport();
         const res: RpcResponse = { id: req.id, ok: true, type: 'EXPORT', data: buffer };
         (self as any).postMessage(res, [buffer.buffer]);
+        break;
+      }
+      case 'RESTORE': {
+        if (!sqlite3) await initDb();
+        if (db) db.close();
+        db = new sqlite3.oo1.DB(':memory:', 'c');
+        const bytes = req.buffer;
+        const pData = sqlite3.wasm.allocFromTypedArray(bytes);
+        const rc = sqlite3.capi.sqlite3_deserialize(
+          db,
+          'main',
+          pData,
+          bytes.byteLength,
+          bytes.byteLength,
+          sqlite3.capi.SQLITE_DESERIALIZE_FREEONCLOSE | sqlite3.capi.SQLITE_DESERIALIZE_RESIZEABLE
+        );
+        if (rc !== 0) throw new Error(`sqlite3_deserialize failed: rc ${rc}`);
+        const pageStats = readPageStats();
+        const res: RpcResponse = { id: req.id, ok: true, type: 'RESTORE', data: { pageStats } };
+        self.postMessage(res);
         break;
       }
       case 'PRAGMA': {

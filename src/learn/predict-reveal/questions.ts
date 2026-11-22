@@ -12,12 +12,14 @@ export const PREDICT_QUESTIONS: PredictQuestion[] = [
     subsystem: 'storage',
     prompt: 'How many total physical pages will the database allocate after this query?',
     options: ['1 Page', '2 Pages', '3 Pages', '4+ Pages'],
-    getCorrectAnswer: (_pre, post) => {
+    getCorrectAnswer: (pre, post) => {
       const count = post.pageStats?.pageCount ?? 1;
+      const prevCount = pre?.pageStats?.pageCount ?? count;
+      const delta = count - prevCount;
       const ans = count === 1 ? '1 Page' : count === 2 ? '2 Pages' : count === 3 ? '3 Pages' : '4+ Pages';
       return {
         answer: ans,
-        explanation: `The database file now contains ${count} page(s) (${count * (post.pageStats?.pageSize ?? 8192)} bytes) based on real page allocation.`,
+        explanation: `The database file now contains ${count} page(s) (${count * (post.pageStats?.pageSize ?? 8192)} bytes)${delta > 0 ? ` (+${delta} new page(s) allocated)` : ''} based on real page allocation.`,
       };
     },
   },
@@ -27,12 +29,15 @@ export const PREDICT_QUESTIONS: PredictQuestion[] = [
     prompt: 'Will the SQLite query planner perform a full table scan or index seek?',
     options: ['FULL TABLE SCAN', 'INDEX SEEK / SEARCH', 'CONSTANT LOOKUP'],
     getCorrectAnswer: (_pre, post) => {
-      const planStr = JSON.stringify(post.results ?? '');
-      const isIndex = planStr.includes('USING INDEX') || planStr.includes('SEARCH');
-      const ans = isIndex ? 'INDEX SEEK / SEARCH' : 'FULL TABLE SCAN';
+      const planStr = (post.explainPlan || JSON.stringify(post.results ?? '')).toUpperCase();
+      const isConstant = planStr.includes('SCAN CONSTANT') || planStr.includes('CONSTANT ROW') || planStr.includes('CONSTANT LOOKUP');
+      const isIndex = planStr.includes('USING INDEX') || planStr.includes('SEARCH') || planStr.includes('COVERING INDEX');
+      const ans = isConstant ? 'CONSTANT LOOKUP' : isIndex ? 'INDEX SEEK / SEARCH' : 'FULL TABLE SCAN';
       return {
         answer: ans,
-        explanation: isIndex
+        explanation: isConstant
+          ? 'SQLite evaluated the query against constant literals without touching storage pages.'
+          : isIndex
           ? 'An index was available and cost-effective, so SQLite performed a logarithmic B-Tree seek.'
           : 'No covering index was usable for this predicate, so SQLite performed a full table scan.',
       };

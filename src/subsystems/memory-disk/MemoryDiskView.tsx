@@ -49,7 +49,7 @@ export function MemoryDiskView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <Badge variant="modeled">MODELED</Badge>
+        <Badge variant="modeled" title="MODELED: Pager buffer pool and LRU eviction simulation derived from access patterns">MODELED</Badge>
         <Badge variant="accent">SUBSYSTEM // MEMORY ↔ DISK</Badge>
         <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em' }}>
           MEMORY ↔ DISK
@@ -63,9 +63,9 @@ export function MemoryDiskView() {
       {/* Stats */}
       <div style={{ display: 'flex', gap: '12px' }}>
         <Stat value={`${cacheModel.capacity} Pages`} label="CACHE CAPACITY" tooltip="Configured PRAGMA cache_size" />
-        <Stat value={`${hitRate}%`} label="HIT RATIO" tooltip="Ratio of cache hits over total page accesses" />
-        <Stat value={cacheModel.hits} label="CACHE HITS" tooltip="Accesses served from memory buffer pool" />
-        <Stat value={cacheModel.evictions} label="EVICTIONS" tooltip="Pages evicted to free buffer pool frames" />
+        <Stat value={totalAccesses > 0 ? `${hitRate}%` : 'n/a'} label="HIT RATIO" tooltip="Ratio of cache hits over total page accesses (n/a before first access)" />
+        <Stat value={totalAccesses > 0 ? cacheModel.hits : 'n/a'} label="CACHE HITS" tooltip="Accesses served from memory buffer pool" />
+        <Stat value={totalAccesses > 0 ? cacheModel.evictions : 'n/a'} label="EVICTIONS" tooltip="Pages evicted to free buffer pool frames (n/a before first access)" />
       </div>
 
       {/* Cache Interactive Controls */}

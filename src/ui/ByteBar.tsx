@@ -94,12 +94,8 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
     // 5. Cell Content Area
     if (width > xContent) {
       ctx.fillStyle = '#10b981';
-      ctx.fillRect(xContent, 0, width - xContent - 2, height);
+      ctx.fillRect(xContent, 0, width - xContent, height);
     }
-
-    // 6. Tail indicator
-    ctx.fillStyle = '#ec4899';
-    ctx.fillRect(width - 6, 0, 6, height);
   }, [hdSize, trSize, cpSize, cellContentStart, pageSize, theme, page.freeSpaceBytes]);
 
   useEffect(() => {
@@ -135,9 +131,21 @@ export const ByteBar = React.memo(function ByteBar({ page, onSelectSegment }: By
 
   return (
     <div className={styles.byteBarWrapper}>
-      <div className={styles.offsetLabelsRow}>
+      <div className={styles.offsetLabelsRow} style={{ position: 'relative' }}>
         <span className={styles.offsetLabel}>{hexStart}</span>
-        {isPage1 && <span className={styles.offsetLabelCenter}>{hexTree}</span>}
+        {isPage1 && (
+          <span
+            style={{
+              position: 'absolute',
+              left: `${Math.max(10, (100 / pageSize) * 100)}%`,
+              color: 'var(--accent-color)',
+              fontSize: '10px',
+            }}
+            title="Offset 0x0064: B-Tree Page 1 Header starts after 100-byte SQLite File Header"
+          >
+            {hexTree}
+          </span>
+        )}
         <span className={styles.offsetLabelRight}>{hexEnd}</span>
       </div>
 

@@ -59,7 +59,7 @@ export function parseBtreePage(
   const firstFreeblock = view.getUint16(1, false);
   const cellCount = view.getUint16(3, false);
   const rawContentStart = view.getUint16(5, false);
-  const cellContentStart = rawContentStart === 0 ? 65536 : rawContentStart;
+  const cellContentStart = rawContentStart === 0 ? (pageSize === 65536 ? 65536 : pageSize) : rawContentStart;
   const fragmentedBytes = view.getUint8(7);
 
   let pageType: BtreePageType = 'UNKNOWN';

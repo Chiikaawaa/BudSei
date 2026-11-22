@@ -27,7 +27,7 @@ export function TransactionsView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <Badge variant="emulated">EMULATED</Badge>
+        <Badge variant="emulated" title="EMULATED: Concurrency conflict and lock escalation modeled to demonstrate multi-connection invariants">EMULATED</Badge>
         <Badge variant="accent">SUBSYSTEM // TRANSACTIONS</Badge>
         <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em' }}>
           TRANSACTIONS

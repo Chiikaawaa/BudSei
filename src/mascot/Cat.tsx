@@ -3,14 +3,12 @@ import { CatSprite } from './catSprite.svg';
 import { useCursorFollow } from './useCursorFollow';
 import { useSettingsStore } from '../store/settingsStore';
 
+/** Cat mascot that smoothly follows the cursor. Unmounts when disabled. */
 export const Cat = React.memo(function Cat() {
   const mascotEnabled = useSettingsStore((s) => s.mascotEnabled);
   const catRef = useCursorFollow(mascotEnabled);
 
-  // If disabled, completely unmount from DOM (zero cost, zero listeners)
-  if (!mascotEnabled) {
-    return null;
-  }
+  if (!mascotEnabled) return null;
 
   return (
     <div

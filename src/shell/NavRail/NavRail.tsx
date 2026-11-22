@@ -33,7 +33,16 @@ export const NavRail = React.memo(function NavRail() {
   // Keyboard navigation: Up / Down arrow + Enter
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target?.isContentEditable ||
+        Boolean(target?.closest('.cm-editor')) ||
+        Boolean(target?.closest('[contenteditable="true"]'))
+      ) {
+        return;
+      }
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         const currentIndex = SUBSYSTEM_ROUTES.findIndex((r) => r.id === activeSubsystem);

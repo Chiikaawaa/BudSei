@@ -18,9 +18,9 @@ interface UiState {
 
 export const useUiStore = create<UiState>((set) => ({
   navRailCollapsed: false,
-  bottomDrawerOpen: false,
+  bottomDrawerOpen: true,
   bottomDrawerTab: 'execution-log',
-  bottomDrawerHeight: 180,
+  bottomDrawerHeight: 140,
   consoleSplitRatio: 0.5,
   theoryDrawerOpen: false,
   commandPaletteOpen: false,

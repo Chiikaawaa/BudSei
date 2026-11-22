@@ -22,6 +22,26 @@
   box-shadow: 0 0 0 1px var(--accent-color);
 }
 
+.pageTile.selected.tableLeaf {
+  border-color: var(--badge-real-text);
+  box-shadow: 0 0 0 1px var(--badge-real-text);
+}
+
+.pageTile.selected.tableInterior {
+  border-color: var(--badge-modeled-text);
+  box-shadow: 0 0 0 1px var(--badge-modeled-text);
+}
+
+.pageTile.selected.indexLeaf {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 1px #a855f7;
+}
+
+.pageTile.selected.indexInterior {
+  border-color: var(--badge-emulated-text);
+  box-shadow: 0 0 0 1px var(--badge-emulated-text);
+}
+
 .topRow {
   display: flex;
   align-items: center;
@@ -54,8 +74,8 @@
 }
 
 .indexLeaf {
-  color: var(--badge-error-text);
-  background: var(--badge-error-bg);
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.15);
 }
 
 .indexInterior {
@@ -90,7 +110,7 @@
 }
 
 .fillBarFill.indexLeaf {
-  background: var(--badge-error-text);
+  background: #a855f7;
 }
 
 .fillBarFill.indexInterior {

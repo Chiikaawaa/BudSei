@@ -13,8 +13,12 @@ export const TimelineScrubber = React.memo(function TimelineScrubber() {
     );
   }
 
-  const activeIdx = activeSnapshotId !== null ? snapshots.findIndex((s) => s.id === activeSnapshotId) : 0;
-  const currentSnap = snapshots[activeIdx] || snapshots[0]!;
+  const chronological = React.useMemo(() => [...snapshots].reverse(), [snapshots]);
+  const activeIdx =
+    activeSnapshotId !== null
+      ? chronological.findIndex((s) => s.id === activeSnapshotId)
+      : chronological.length - 1;
+  const currentSnap = chronological[activeIdx] || snapshots[0]!;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px 16px', height: '100%' }}>
@@ -41,16 +45,16 @@ export const TimelineScrubber = React.memo(function TimelineScrubber() {
         </div>
       </div>
 
-      {/* Horizontal Scrubber Track */}
+      {/* Horizontal Scrubber Track (Left: Oldest ➔ Right: Newest) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <input
           type="range"
           min={0}
-          max={snapshots.length - 1}
+          max={chronological.length - 1}
           value={activeIdx}
           onChange={(e) => {
             const idx = Number(e.target.value);
-            const target = snapshots[idx];
+            const target = chronological[idx];
             if (target) scrubTo(target.id);
           }}
           style={{ flex: 1, cursor: 'pointer' }}

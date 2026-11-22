@@ -20,8 +20,21 @@ export function parseLeafTableCell(buffer: Uint8Array, offset: number): BtreeCel
   cursor += rBytes;
 
   const payloadOffset = cursor;
-  const columns = decodeRecord(buffer, payloadOffset, payloadSize);
-  const cellSize = pBytes + rBytes + payloadSize;
+  // Guard against overflow pages where local payload is smaller than total payloadSize
+  const maxLocalPayload = Math.max(0, buffer.length - payloadOffset);
+  const localPayloadSize = Math.min(payloadSize, maxLocalPayload);
+  const columns = decodeRecord(buffer, payloadOffset, localPayloadSize);
+  
+  let overflowPage: number | undefined;
+  if (payloadSize > localPayloadSize && buffer.length >= payloadOffset + localPayloadSize + 4) {
+    const view = new DataView(buffer.buffer, buffer.byteOffset + payloadOffset + localPayloadSize, 4);
+    overflowPage = view.getUint32(0, false);
+  }
+
+  const cellSize = Math.min(
+    buffer.length - offset,
+    pBytes + rBytes + localPayloadSize + (overflowPage !== undefined ? 4 : 0)
+  );
 
   return {
     offset,
@@ -29,6 +42,7 @@ export function parseLeafTableCell(buffer: Uint8Array, offset: number): BtreeCel
     payloadSize,
     rowid,
     columns,
+    overflowPage,
   };
 }
 
@@ -49,11 +63,13 @@ export function parseInteriorTableCell(buffer: Uint8Array, offset: number): Btre
 export function parseLeafIndexCell(buffer: Uint8Array, offset: number): BtreeCell {
   const { value: payloadSize, bytesRead: pBytes } = readVarint(buffer, offset);
   const payloadOffset = offset + pBytes;
-  const columns = decodeRecord(buffer, payloadOffset, payloadSize);
+  const maxLocalPayload = Math.max(0, buffer.length - payloadOffset);
+  const localPayloadSize = Math.min(payloadSize, maxLocalPayload);
+  const columns = decodeRecord(buffer, payloadOffset, localPayloadSize);
 
   return {
     offset,
-    size: pBytes + payloadSize,
+    size: pBytes + localPayloadSize,
     payloadSize,
     columns,
   };
@@ -64,11 +80,13 @@ export function parseInteriorIndexCell(buffer: Uint8Array, offset: number): Btre
   const leftChildPage = view.getUint32(0, false);
   const { value: payloadSize, bytesRead: pBytes } = readVarint(buffer, offset + 4);
   const payloadOffset = offset + 4 + pBytes;
-  const columns = decodeRecord(buffer, payloadOffset, payloadSize);
+  const maxLocalPayload = Math.max(0, buffer.length - payloadOffset);
+  const localPayloadSize = Math.min(payloadSize, maxLocalPayload);
+  const columns = decodeRecord(buffer, payloadOffset, localPayloadSize);
 
   return {
     offset,
-    size: 4 + pBytes + payloadSize,
+    size: 4 + pBytes + localPayloadSize,
     payloadSize,
     leftChildPage,
     columns,

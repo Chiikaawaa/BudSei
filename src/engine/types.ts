@@ -29,6 +29,7 @@ export type RpcPayload =
   | { type: 'INIT' }
   | { type: 'EXEC'; sql: string }
   | { type: 'EXPORT' }
+  | { type: 'RESTORE'; buffer: Uint8Array }
   | { type: 'PRAGMA'; name: string; value?: string | number }
   | { type: 'RESET' };
 
@@ -38,6 +39,7 @@ export type RpcResponse =
   | { id: number; ok: true; data: InitResponse; type: 'INIT' }
   | { id: number; ok: true; data: ExecResponse; type: 'EXEC' }
   | { id: number; ok: true; data: Uint8Array; type: 'EXPORT' }
+  | { id: number; ok: true; data: { pageStats: PageStats }; type: 'RESTORE' }
   | { id: number; ok: true; data: any; type: 'PRAGMA' }
   | { id: number; ok: true; data: boolean; type: 'RESET' }
   | { id: number; ok: false; error: string; code?: string };

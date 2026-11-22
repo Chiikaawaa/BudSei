@@ -23,12 +23,10 @@ export const PageDetail = React.memo(function PageDetail() {
   const hexRange = `Bytes 0x${startByte.toString(16).padStart(4, '0')} — 0x${endByte.toString(16).padStart(4, '0')}`;
 
   const badgeVariant =
-    page.header.pageType === 'TABLE_LEAF'
+    page.header.pageType === 'TABLE_LEAF' || page.header.pageType === 'INDEX_LEAF'
       ? 'real'
-      : page.header.pageType === 'TABLE_INTERIOR'
+      : page.header.pageType === 'TABLE_INTERIOR' || page.header.pageType === 'INDEX_INTERIOR'
       ? 'modeled'
-      : page.header.pageType === 'INDEX_LEAF'
-      ? 'error'
       : 'emulated';
 
   return (

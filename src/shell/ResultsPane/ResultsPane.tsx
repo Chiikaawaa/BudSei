@@ -8,7 +8,10 @@ export const ResultsPane = React.memo(function ResultsPane() {
   const { results, status, errorMessage, lastDurationMs, lastTotalChanges } = useConsoleStore();
   const { sqliteVersion } = useSessionStore();
 
-  const totalRowCount = results.reduce((acc, curr) => acc + curr.rows.length, 0);
+  const totalRowCount = results.reduce(
+    (acc, curr) => acc + (curr.rows.length > 0 ? curr.rows.length : (curr.columnsData?.[0]?.length ?? 0)),
+    0
+  );
 
   return (
     <div className={styles.resultsContainer}>
@@ -30,18 +33,21 @@ export const ResultsPane = React.memo(function ResultsPane() {
           </div>
         ) : results.length > 0 ? (
           <div className={styles.resultsStack}>
-            {results.map((res, idx) => (
-              <div key={idx} className={styles.singleResultBlock}>
-                {results.length > 1 && (
-                  <div className={styles.stmtHeader}>
-                    Statement {idx + 1} ({res.rows.length} rows)
+            {results.map((res, idx) => {
+              const rowCount = res.rows.length > 0 ? res.rows.length : (res.columnsData?.[0]?.length ?? 0);
+              return (
+                <div key={idx} className={styles.singleResultBlock}>
+                  {results.length > 1 && (
+                    <div className={styles.stmtHeader}>
+                      Statement {idx + 1} ({rowCount} rows)
+                    </div>
+                  )}
+                  <div className={styles.tableWrapper}>
+                    <ResultTable columns={res.columns} rows={res.rows} columnsData={res.columnsData} />
                   </div>
-                )}
-                <div className={styles.tableWrapper}>
-                  <ResultTable columns={res.columns} rows={res.rows} />
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : lastDurationMs !== null ? (
           <div className={styles.emptyState}>

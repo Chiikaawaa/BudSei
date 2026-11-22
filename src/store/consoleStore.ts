@@ -29,6 +29,16 @@ export function registerExecutionListener(fn: () => void): () => void {
   };
 }
 
+export function notifyExecutionListeners(): void {
+  for (const listener of executionListeners) {
+    try {
+      listener();
+    } catch {
+      // Ignore listener error
+    }
+  }
+}
+
 export const useConsoleStore = create<ConsoleState>((set, get) => ({
   sql: 'SELECT sqlite_version();',
   status: 'ready',
@@ -68,13 +78,7 @@ export const useConsoleStore = create<ConsoleState>((set, get) => ({
       });
 
       // Notify external subscribers
-      for (const listener of executionListeners) {
-        try {
-          listener();
-        } catch {
-          // Ignore listener error
-        }
-      }
+      notifyExecutionListeners();
     } catch (err: any) {
       set({
         status: 'error',

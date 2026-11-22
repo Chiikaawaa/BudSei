@@ -23,7 +23,7 @@ interface SessionState {
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
-  sqliteVersion: '3.54',
+  sqliteVersion: '3.49.1',
   pageSize: 8192,
   pageCount: 1,
   freelistCount: 0,
@@ -39,9 +39,13 @@ export const useSessionStore = create<SessionState>((set) => ({
   setJournalMode: (journalMode) => set({ journalMode }),
   setConnectionMode: (connectionMode) => set({ connectionMode }),
   toggleConnectionMode: () =>
-    set((state) => ({
-      connectionMode: state.connectionMode === 'Single' ? 'Dual' : 'Single',
-    })),
+    set((state) => {
+      const nextMode = state.connectionMode === 'Single' ? 'Dual' : 'Single';
+      return {
+        connectionMode: nextMode,
+        activeSubsystem: nextMode === 'Dual' ? 'transactions' : state.activeSubsystem,
+      };
+    }),
   setIsExecuting: (isExecuting) => set({ isExecuting }),
   setActiveSubsystem: (activeSubsystem) => set({ activeSubsystem }),
 }));

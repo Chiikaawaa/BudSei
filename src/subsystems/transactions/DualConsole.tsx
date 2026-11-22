@@ -12,8 +12,8 @@ export const DualConsole = React.memo(function DualConsole({ onAction, onReset }
     { id: 'BEGIN_DEFERRED', label: 'BEGIN (DEFERRED)' },
     { id: 'BEGIN_IMMEDIATE', label: 'BEGIN IMMEDIATE' },
     { id: 'SELECT', label: 'SELECT * (SHARED)' },
-    { id: 'UPDATE', label: 'UPDATE (EXCLUSIVE)' },
-    { id: 'COMMIT', label: 'COMMIT' },
+    { id: 'UPDATE', label: 'UPDATE (RESERVED)' },
+    { id: 'COMMIT', label: 'COMMIT (EXCLUSIVE)' },
     { id: 'ROLLBACK', label: 'ROLLBACK' },
   ];
 

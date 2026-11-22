@@ -14,7 +14,7 @@
 
 .value {
   font-family: var(--font-mono);
-  font-size: var(--text-2xl);
+  font-size: 32px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: var(--tracking-tight);
@@ -26,8 +26,9 @@
 .label {
   margin-top: 5px;
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   border-bottom: 1px dotted var(--border-color);

@@ -4,7 +4,7 @@ export interface BtreeNode {
   pageNo: number;
   type: string;
   isLeaf: boolean;
-  keys: number[];
+  keys: (number | string)[];
   children: BtreeNode[];
   fillPercentage: number;
   cellCount: number;
@@ -75,7 +75,7 @@ export function buildBtreeModel(
     pageCount++;
 
     const isLeaf = parsed.header.pageType.endsWith('_LEAF');
-    const keys: number[] = [];
+    const keys: (number | string)[] = [];
     const children: BtreeNode[] = [];
     let deepest = currentDepth;
 
@@ -83,6 +83,9 @@ export function buildBtreeModel(
       for (const cell of parsed.cells) {
         if (cell.rowid !== undefined) {
           keys.push(cell.rowid);
+        } else if (cell.columns && cell.columns.length > 0) {
+          const colVals = cell.columns.map((c) => c.value).filter((v) => v !== null && v !== undefined);
+          keys.push(colVals.length > 0 ? colVals.join(' | ') : `Cell@0x${cell.offset.toString(16)}`);
         }
       }
     } else {
@@ -95,6 +98,9 @@ export function buildBtreeModel(
         }
         if (cell.rowid !== undefined) {
           keys.push(cell.rowid);
+        } else if (cell.columns && cell.columns.length > 0) {
+          const colVals = cell.columns.map((c) => c.value).filter((v) => v !== null && v !== undefined);
+          keys.push(colVals.length > 0 ? colVals.join(' | ') : `Cell@0x${cell.offset.toString(16)}`);
         }
       }
       if (parsed.header.rightChildPage) {
@@ -132,7 +138,7 @@ export function buildBtreeModel(
   };
 }
 
-export function findRoutingPath(root: BtreeNode | null, targetKey: number): number[] {
+export function findRoutingPath(root: BtreeNode | null, targetKey: number | string): number[] {
   if (!root) return [];
   const path: number[] = [root.pageNo];
   if (root.isLeaf) return path;
@@ -140,7 +146,10 @@ export function findRoutingPath(root: BtreeNode | null, targetKey: number): numb
   // Interior routing: keys partition children
   let childIdx = 0;
   for (let i = 0; i < root.keys.length; i++) {
-    if (targetKey <= root.keys[i]!) {
+    const k = root.keys[i]!;
+    const isNum = typeof targetKey === 'number' || (!isNaN(Number(targetKey)) && !isNaN(Number(k)));
+    const match = isNum ? Number(targetKey) <= Number(k) : String(targetKey).localeCompare(String(k)) <= 0;
+    if (match) {
       childIdx = i;
       break;
     }

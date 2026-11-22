@@ -28,7 +28,7 @@
 
 ## 2. Layout Dimensions (1920×930 target)
 - **TopBar**: `44px` height, full width hairline bottom border.
-- **NavRail**: `274px` width, hairline right border, active item with `3px` accent left bar.
+- **NavRail**: `214px` width (reduced 22% from original 274px), hairline right border, active item with `3px` accent left bar.
 - **Console Column**: `~560px` width, hairline right border.
   - Split vertically into `SQL CONSOLE` and `QUERY RESULTS` at ~50%.
 - **Subsystem Panel**: Flex 1 (scrolls vertically).

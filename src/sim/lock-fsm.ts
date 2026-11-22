@@ -22,7 +22,7 @@ export interface LockTransitionResult {
 const PERMITTED_TARGETS_WHEN_OTHER_HAS: Record<LockLevel, Set<LockLevel>> = {
   UNLOCKED: new Set(['UNLOCKED', 'SHARED', 'RESERVED', 'PENDING', 'EXCLUSIVE']),
   SHARED: new Set(['UNLOCKED', 'SHARED', 'RESERVED', 'PENDING']), // Cannot acquire EXCLUSIVE while reader exists
-  RESERVED: new Set(['UNLOCKED', 'SHARED', 'PENDING']), // Another connection cannot acquire RESERVED or EXCLUSIVE
+  RESERVED: new Set(['UNLOCKED', 'SHARED']), // Only the connection holding RESERVED may escalate to PENDING
   PENDING: new Set(['UNLOCKED']), // No new readers or writers allowed
   EXCLUSIVE: new Set(['UNLOCKED']), // Total exclusivity
 };

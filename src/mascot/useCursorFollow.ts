@@ -6,6 +6,7 @@ export function useCursorFollow(enabled: boolean) {
   const posRef = useRef<{ x: number; y: number }>({ x: -100, y: -100 });
   const isFacingLeftRef = useRef(false);
   const lastMoveTimeRef = useRef(Date.now());
+  const bobAmpRef = useRef(0);
   const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -14,9 +15,9 @@ export function useCursorFollow(enabled: boolean) {
     // Respect reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Parked resting position in top-right corner
-    const initX = window.innerWidth - 72;
-    const initY = 40;
+    // Parked resting position: top-right corner, full cat visible
+    const initX = window.innerWidth - 56;
+    const initY = 6;
     targetRef.current = { x: initX, y: initY };
     posRef.current = { x: initX, y: initY };
 
@@ -28,8 +29,8 @@ export function useCursorFollow(enabled: boolean) {
     }
 
     const onPointerMove = (e: PointerEvent) => {
-      // Offset slightly to the lower-right so cursor click target is never obscured
-      targetRef.current = { x: e.clientX + 10, y: e.clientY + 12 };
+      // Center the cat on the cursor (sprite is 48px; subtract half to align center)
+      targetRef.current = { x: e.clientX - 24, y: e.clientY - 24 };
       lastMoveTimeRef.current = Date.now();
     };
 
@@ -54,9 +55,11 @@ export function useCursorFollow(enabled: boolean) {
         isFacingLeftRef.current = dx < 0;
       }
 
-      // Idle breathing bob when stationary
+      // Idle breathing bob smoothly eased when stationary
       const isIdle = Date.now() - lastMoveTimeRef.current > 1200;
-      const bob = isIdle ? Math.sin(Date.now() / 320) * 2.5 : 0;
+      const targetAmp = isIdle ? 2.5 : 0;
+      bobAmpRef.current += (targetAmp - bobAmpRef.current) * 0.08;
+      const bob = Math.sin(Date.now() / 320) * bobAmpRef.current;
 
       const scaleX = isFacingLeftRef.current ? -1 : 1;
 

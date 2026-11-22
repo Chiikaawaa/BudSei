@@ -11,6 +11,7 @@ interface ResultTableProps {
 export const ResultTable = React.memo(function ResultTable({
   columns,
   rows,
+  columnsData,
   rowHeight = 24,
 }: ResultTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +34,7 @@ export const ResultTable = React.memo(function ResultTable({
     setScrollTop(e.currentTarget.scrollTop);
   }, []);
 
-  const totalRows = rows.length;
+  const totalRows = rows.length > 0 ? rows.length : (columnsData?.[0]?.length ?? 0);
   const totalHeight = totalRows * rowHeight;
   const buffer = 8;
   const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - buffer);
@@ -41,7 +42,16 @@ export const ResultTable = React.memo(function ResultTable({
   const endIndex = Math.min(totalRows, startIndex + visibleCount);
 
   const topOffset = startIndex * rowHeight;
-  const visibleRows = rows.slice(startIndex, endIndex);
+
+  // Render rows either directly or by reading from columnar data arrays
+  const visibleRows: (string | number | null | Uint8Array)[][] = [];
+  for (let i = startIndex; i < endIndex; i++) {
+    if (rows.length > i) {
+      visibleRows.push(rows[i]!);
+    } else if (columnsData && columnsData.length > 0) {
+      visibleRows.push(columnsData.map((col) => col[i]));
+    }
+  }
 
   return (
     <div className={styles.tableContainer} ref={containerRef} onScroll={handleScroll}>

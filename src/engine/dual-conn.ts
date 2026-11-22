@@ -16,6 +16,7 @@ export class DualConnectionSimulator {
 
   public executeAction(conn: 'A' | 'B', action: 'BEGIN_DEFERRED' | 'BEGIN_IMMEDIATE' | 'SELECT' | 'UPDATE' | 'COMMIT' | 'ROLLBACK') {
     let targetLock: LockLevel = 'UNLOCKED';
+    const current = conn === 'A' ? this.fsm.connALock : this.fsm.connBLock;
 
     switch (action) {
       case 'BEGIN_DEFERRED':
@@ -28,9 +29,45 @@ export class DualConnectionSimulator {
         targetLock = 'SHARED';
         break;
       case 'UPDATE':
-        targetLock = 'EXCLUSIVE';
+        targetLock = 'RESERVED';
         break;
       case 'COMMIT':
+        // Committing a write transaction requires escalating to EXCLUSIVE first
+        if (current === 'RESERVED' || current === 'PENDING') {
+          // In SQLite, write transactions escalate RESERVED -> PENDING -> EXCLUSIVE
+          if (current === 'RESERVED') {
+            const pendRes = this.fsm.requestTransition(conn, 'PENDING');
+            if (!pendRes.ok) {
+              const logItem: ConnActionLog = {
+                id: this.nextId++,
+                timestamp: Date.now(),
+                conn,
+                action: 'COMMIT (PENDING)',
+                result: 'SQLITE_BUSY',
+                detail: `${pendRes.code}: ${pendRes.error}`,
+              };
+              this.logs.unshift(logItem);
+              if (this.logs.length > 50) this.logs.pop();
+              return pendRes;
+            }
+          }
+          const escRes = this.fsm.requestTransition(conn, 'EXCLUSIVE');
+          if (!escRes.ok) {
+            const logItem: ConnActionLog = {
+              id: this.nextId++,
+              timestamp: Date.now(),
+              conn,
+              action: 'COMMIT (EXCLUSIVE)',
+              result: 'SQLITE_BUSY',
+              detail: `${escRes.code}: ${escRes.error}`,
+            };
+            this.logs.unshift(logItem);
+            if (this.logs.length > 50) this.logs.pop();
+            return escRes;
+          }
+        }
+        targetLock = 'UNLOCKED';
+        break;
       case 'ROLLBACK':
         targetLock = 'UNLOCKED';
         break;

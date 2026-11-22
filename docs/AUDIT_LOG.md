@@ -219,8 +219,8 @@ End-to-end integration across all 7 diagnostic subsystems, code size invariants,
 
 ### Measurements & Verification
 1. **LOC Hardening**: Ran `scripts/check-loc.mjs`:
-   - Total source files: **139**
-   - Files < 200 LOC: **139 (100.0%)** [Target: $\ge$ 90%]
+   - Total source files: **142**
+   - Files < 200 LOC: **142 (100.0%)** [Target: $\ge$ 90%]
    - Files $\ge$ 200 LOC: **0**
    - Files > 300 LOC (Hard Ceiling): **0**
 2. **Exclusion Check**: `git grep -i` across repository:

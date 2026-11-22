@@ -20,6 +20,7 @@ export const TreeCanvas = React.memo(function TreeCanvas({
   }
 
   const pathSet = new Set(highlightedPath);
+  const isSmallTree = root.children.length === 0;
 
   function renderNode(node: BtreeNode, depth: number): React.ReactNode {
     const isHighlighted = pathSet.has(node.pageNo);
@@ -62,5 +63,16 @@ export const TreeCanvas = React.memo(function TreeCanvas({
     );
   }
 
-  return <div className={styles.canvasContainer}>{renderNode(root, 0)}</div>;
+  return (
+    <div className={`${styles.canvasContainer} ${isSmallTree ? styles.compactCanvas : ''}`}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {renderNode(root, 0)}
+        {root.children.length === 0 && root.cellCount === 0 && (
+          <div className={styles.emptyNotice}>
+            Empty rootpage (0 keys). Click &quot;Load Demo&quot; in the SQL console to generate multi-level B-tree pages.
+          </div>
+        )}
+      </div>
+    </div>
+  );
 });

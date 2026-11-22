@@ -12,14 +12,11 @@ const explainCache = new Map<string, { instructions: VdbeInstruction[]; planNode
 
 export function QueryView() {
   const consoleSql = useConsoleStore((s) => s.sql);
-  const [queryInput, setQueryInput] = useState<string>('SELECT * FROM users WHERE id = 10;');
+  const [queryInput, setQueryInput] = useState<string>('SELECT * FROM users WHERE id = 5;');
   const [instructions, setInstructions] = useState<VdbeInstruction[]>([]);
   const [planNodes, setPlanNodes] = useState<PlanNode[]>([]);
   const [currentAddr, setCurrentAddr] = useState<number>(0);
-  const [registers, setRegisters] = useState<RegisterState[]>([
-    { index: 1, value: 10, type: 'INTEGER' },
-    { index: 2, value: 'Alice', type: 'TEXT' },
-  ]);
+  const [registers, setRegisters] = useState<RegisterState[]>([]);
   const [cursors, setCursors] = useState<CursorState[]>([]);
 
   const analyzeQuery = useCallback(async (sqlToRun: string) => {
@@ -90,15 +87,41 @@ export function QueryView() {
 
   const handleStep = () => {
     if (instructions.length === 0) return;
-    const nextIdx = (instructions.findIndex((i) => i.addr === currentAddr) + 1) % instructions.length;
-    const nextInst = instructions[nextIdx]!;
-    setCurrentAddr(nextInst.addr);
+    const currIdx = instructions.findIndex((i) => i.addr === currentAddr);
+    const currInst = currIdx >= 0 ? instructions[currIdx]! : instructions[0]!;
 
-    // Simulate register update for Column/Integer
-    if (nextInst.opcode === 'Integer') {
+    let nextAddr = (instructions[(currIdx + 1) % instructions.length]?.addr) ?? 0;
+
+    // Follow SQLite VDBE branch instructions (Init, Goto, etc.)
+    if ((currInst.opcode === 'Init' || currInst.opcode === 'Goto') && currInst.p2 >= 0) {
+      const targetInst = instructions.find((i) => i.addr === currInst.p2);
+      if (targetInst) {
+        nextAddr = targetInst.addr;
+      }
+    }
+
+    setCurrentAddr(nextAddr);
+
+    // Update simulated registers based on opcode
+    if (currInst.opcode === 'Integer') {
       setRegisters((prev) => [
-        ...prev.filter((r) => r.index !== nextInst.p2),
-        { index: nextInst.p2, value: nextInst.p1, type: 'INTEGER' },
+        ...prev.filter((r) => r.index !== currInst.p2),
+        { index: currInst.p2, value: currInst.p1, type: 'INTEGER' },
+      ]);
+    } else if (currInst.opcode === 'String8' || currInst.opcode === 'String') {
+      setRegisters((prev) => [
+        ...prev.filter((r) => r.index !== currInst.p2),
+        { index: currInst.p2, value: currInst.p4 || '', type: 'TEXT' },
+      ]);
+    } else if (currInst.opcode === 'Real') {
+      setRegisters((prev) => [
+        ...prev.filter((r) => r.index !== currInst.p2),
+        { index: currInst.p2, value: parseFloat(currInst.p4 || '0'), type: 'REAL' },
+      ]);
+    } else if (currInst.opcode === 'Null') {
+      setRegisters((prev) => [
+        ...prev.filter((r) => r.index !== currInst.p2),
+        { index: currInst.p2, value: null, type: 'NULL' },
       ]);
     }
   };
@@ -107,8 +130,8 @@ export function QueryView() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Badge variant="real">REAL SQLITE</Badge>
-          <Badge variant="modeled">MODELED</Badge>
+          <Badge variant="real" title="REAL SQLITE: EXPLAIN bytecode and query plans directly from SQLite WASM engine">REAL SQLITE</Badge>
+          <Badge variant="modeled" title="MODELED: VDBE register states and cursor tracking modeled from opcodes">MODELED</Badge>
           <Badge variant="accent">SUBSYSTEM // QUERY ENGINE</Badge>
           <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em' }}>
             QUERY ENGINE
@@ -122,7 +145,7 @@ export function QueryView() {
           <Button variant="primary" onClick={handleStep}>
             Step VDBE ⏭
           </Button>
-          <Button variant="outline" onClick={() => setCurrentAddr(instructions[0]?.addr ?? 0)}>
+          <Button variant="outline" onClick={() => { setCurrentAddr(instructions[0]?.addr ?? 0); setRegisters([]); }}>
             Reset
           </Button>
         </div>

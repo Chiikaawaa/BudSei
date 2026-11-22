@@ -57,7 +57,14 @@ export const ObjectTree = React.memo(function ObjectTree({
                       fontWeight: isSelected ? 700 : 400,
                     }}
                   >
-                    <span>{obj.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>{obj.name}</span>
+                      {obj.name.startsWith('sqlite_') && (
+                        <span style={{ fontSize: '9px', padding: '1px 4px', borderRadius: '2px', background: 'var(--bg-surface-active)', color: 'var(--text-muted)', border: '1px solid var(--border-color)' }}>
+                          internal
+                        </span>
+                      )}
+                    </div>
                     {obj.rootpage > 0 && (
                       <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>
                         P{obj.rootpage}

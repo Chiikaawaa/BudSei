@@ -2,6 +2,7 @@ export interface RollbackJournalHeader {
   magic: string;
   pageCount: number;
   initialRandomNumber: number;
+  dbPageCount?: number;
   sectorSize: number;
   pageSize: number;
 }
@@ -24,7 +25,8 @@ export function parseJournalHeader(buffer: Uint8Array): RollbackJournalHeader | 
     magic,
     pageCount: view.getUint32(8, false),
     initialRandomNumber: view.getUint32(12, false),
-    sectorSize: view.getUint32(16, false),
-    pageSize: view.getUint32(20, false),
+    dbPageCount: view.getUint32(16, false),
+    sectorSize: view.getUint32(20, false),
+    pageSize: view.getUint32(24, false),
   };
 }

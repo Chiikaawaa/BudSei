@@ -9,6 +9,18 @@
   min-height: 220px;
 }
 
+.compactCanvas {
+  min-height: 110px;
+  padding: 10px;
+}
+
+.emptyNotice {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .emptyPrompt {
   padding: 24px;
   font-family: var(--font-mono);

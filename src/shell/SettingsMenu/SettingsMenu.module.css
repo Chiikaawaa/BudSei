@@ -1,0 +1,38 @@
+.overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); animation: fadeIn 100ms ease; }
+.panel { position: fixed; top: calc(var(--topbar-height, 44px) + 6px); right: 12px; width: 320px; max-width: calc(100vw - 24px); background: var(--bg-surface, #141418); border: 1px solid var(--border-color, #262630); border-radius: var(--radius-md, 4px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2); z-index: 10001; overflow: hidden; display: flex; flex-direction: column; animation: slideDown 120ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border-color, #262630); background: var(--bg-surface-active, #1c1c24); }
+.headerTitle { font-family: var(--font-mono, monospace); font-size: var(--text-xs, 11px); font-weight: 700; letter-spacing: var(--tracking-wider, 0.12em); color: var(--text-primary, #e6e6ec); text-transform: uppercase; }
+.closeBtn { font-family: var(--font-mono, monospace); font-size: 14px; color: var(--text-muted, #646476); padding: 2px 6px; border-radius: var(--radius-xs, 2px); cursor: pointer; line-height: 1; }
+.closeBtn:hover { color: var(--text-primary, #e6e6ec); background: var(--bg-surface-hover, #191920); }
+.body { padding: 14px; display: flex; flex-direction: column; gap: 16px; max-height: calc(100vh - 100px); overflow-y: auto; }
+.section { display: flex; flex-direction: column; gap: 8px; }
+.sectionHeader { display: flex; align-items: center; justify-content: space-between; }
+.sectionLabel { font-family: var(--font-mono, monospace); font-size: var(--text-2xs, 10px); font-weight: 700; letter-spacing: var(--tracking-wider, 0.12em); color: var(--text-muted, #646476); text-transform: uppercase; }
+.themeRow { display: flex; gap: 8px; }
+.themeBtn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; font-family: var(--font-mono, monospace); font-size: var(--text-xs, 11px); font-weight: 600; border: 1px solid var(--border-color, #262630); border-radius: var(--radius-sm, 2px); color: var(--text-secondary, #9090a0); background: var(--bg-surface, #141418); cursor: pointer; transition: all var(--transition-fast, 120ms ease); }
+.themeBtn:hover { border-color: var(--accent-border, rgba(232, 124, 156, 0.4)); color: var(--text-primary, #e6e6ec); background: var(--bg-surface-hover, #191920); }
+.themeBtn.active { background: var(--accent-tint, rgba(232, 124, 156, 0.2)); border-color: var(--accent-color, #e87c9c); color: var(--accent-color, #e87c9c); }
+.swatchRow { display: flex; gap: 7px; flex-wrap: wrap; }
+.swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform var(--transition-fast, 120ms ease); }
+.swatch:hover, .swatch.selected { transform: scale(1.15); }
+.swatch.selected { border-color: var(--text-primary, #fff); box-shadow: 0 0 8px rgba(0, 0, 0, 0.5); }
+.swatchPill { padding: 4px 8px; font-family: var(--font-mono, monospace); font-size: var(--text-2xs, 10px); border: 1px solid var(--border-color, #262630); border-radius: var(--radius-xs, 2px); color: var(--text-secondary, #9090a0); background: var(--bg-surface-active, #1c1c24); cursor: pointer; transition: all var(--transition-fast, 120ms ease); }
+.swatchPill:hover, .swatchPill.selected { color: var(--text-primary, #fff); border-color: var(--accent-color, #e87c9c); }
+.swatchPill.selected { background: var(--accent-tint, rgba(232, 124, 156, 0.2)); color: var(--accent-color, #e87c9c); }
+.customRow { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.customLabel { font-family: var(--font-mono, monospace); font-size: var(--text-2xs, 10px); color: var(--text-muted, #646476); }
+.colorInput { width: 32px; height: 24px; padding: 0; border: 1px solid var(--border-color, #262630); border-radius: var(--radius-xs, 2px); cursor: pointer; background: none; }
+.hexInput { flex: 1; font-family: var(--font-mono, monospace); font-size: var(--text-xs, 11px); color: var(--text-primary, #e6e6ec); background: var(--bg-surface-active, #1c1c24); border: 1px solid var(--border-color, #262630); border-radius: var(--radius-xs, 2px); padding: 3px 6px; }
+.hexInput:focus { border-color: var(--accent-color, #e87c9c); outline: none; }
+.resetBtn { font-family: var(--font-mono, monospace); font-size: var(--text-2xs, 10px); color: var(--text-muted, #646476); padding: 3px 6px; border: 1px solid var(--border-muted, #1c1c24); border-radius: var(--radius-xs, 2px); background: transparent; cursor: pointer; }
+.resetBtn:hover { color: var(--text-primary, #fff); border-color: var(--border-color, #262630); }
+.toggleRow { display: flex; align-items: center; justify-content: space-between; }
+.toggleLabel { font-family: var(--font-sans, sans-serif); font-size: var(--text-xs, 11px); font-weight: 500; color: var(--text-primary, #e6e6ec); }
+.toggle { position: relative; width: 38px; height: 20px; background: var(--bg-surface-active, #1c1c24); border: 1px solid var(--border-color, #262630); border-radius: 10px; cursor: pointer; transition: all var(--transition-fast, 120ms ease); }
+.toggle.on { background: var(--accent-color, #e87c9c); border-color: var(--accent-color, #e87c9c); }
+.toggleKnob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: var(--text-muted, #646476); border-radius: 50%; transition: transform var(--transition-fast, 120ms ease), background var(--transition-fast, 120ms ease); }
+.toggle.on .toggleKnob { transform: translateX(18px); background: #ffffff; }
+.catPreviewRow { display: flex; align-items: center; gap: 12px; background: var(--bg-surface-active, #1c1c24); padding: 6px 10px; border-radius: var(--radius-xs, 2px); border: 1px solid var(--border-color, #262630); }
+.divider { height: 1px; background: var(--border-muted, #1c1c24); margin: 0 -14px; }

@@ -1,6 +1,6 @@
 :root {
   /* Common geometry & physics */
-  --font-mono: 'Space Mono', 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-mono: 'JetBrains Mono', 'Space Mono', 'Fira Code', 'Courier New', monospace;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --radius-none: 0px;
@@ -11,7 +11,7 @@
   --border-width: 1px;
   --topbar-height: 44px;
   --footer-height: 24px;
-  --navrail-width: 274px;
+  --navrail-width: 214px;
 
   /* Typography scale */
   --text-2xs: 10px;

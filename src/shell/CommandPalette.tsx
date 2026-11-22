@@ -17,7 +17,7 @@ interface CommandItem {
 export const CommandPalette = React.memo(function CommandPalette() {
   const { commandPaletteOpen, setCommandPaletteOpen, toggleTheoryDrawer } = useUiStore();
   const { setActiveSubsystem, toggleConnectionMode } = useSessionStore();
-  const { toggleTheme, toggleMascot, mascotEnabled } = useSettingsStore();
+  const { toggleTheme, toggleMascot, mascotEnabled, toggleMenu } = useSettingsStore();
   const { loadPreset, execute } = useConsoleStore();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -56,6 +56,12 @@ export const CommandPalette = React.memo(function CommandPalette() {
         category: 'Settings',
         title: 'Toggle Theme (Dark / Light)',
         action: () => toggleTheme(),
+      },
+      {
+        id: 'settings',
+        category: 'Settings',
+        title: 'Open Theme & Mascot Settings Menu',
+        action: () => toggleMenu(),
       },
       {
         id: 'mascot',
@@ -112,6 +118,26 @@ export const CommandPalette = React.memo(function CommandPalette() {
     [setCommandPaletteOpen]
   );
 
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex((prev) => (filtered.length > 0 ? (prev + 1) % filtered.length : 0));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          filtered.length > 0 ? (prev - 1 + filtered.length) % filtered.length : 0
+        );
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (filtered[selectedIndex]) {
+          runItem(filtered[selectedIndex]!);
+        }
+      }
+    },
+    [filtered, selectedIndex, runItem]
+  );
+
   if (!commandPaletteOpen) return null;
 
   return (
@@ -127,6 +153,7 @@ export const CommandPalette = React.memo(function CommandPalette() {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
+            onKeyDown={handleInputKeyDown}
             autoFocus
           />
         </div>

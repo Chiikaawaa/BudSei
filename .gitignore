@@ -1,5 +1,62 @@
-node_modules
-dist
-.vscode
-.DS_Store
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build and Production outputs
+dist/
+dist-ssr/
+build/
 *.local
+
+# Environment & Local configuration
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Editor & IDE configurations
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Caches & Temporary files
+.turbo/
+.cache/
+*.tsbuildinfo
+.eslintcache
+temp/
+tmp/
+
+# Vite & Vitest temp files
+vite.config.ts.timestamp-*
+vitest.config.ts.timestamp-*
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini

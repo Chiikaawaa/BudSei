@@ -2,10 +2,13 @@ import React, { useCallback, Suspense, lazy } from 'react';
 import styles from './ConsolePane.module.css';
 import { Select } from '../../ui/Select';
 import { Badge } from '../../ui/Badge';
+import { Button } from '../../ui/Button';
 import { PredictCard } from '../../learn/predict-reveal/PredictCard';
 import { usePredictStore } from '../../learn/predict-reveal/predictStore';
 import { selectQuestionForSql } from '../../learn/predict-reveal/questions';
 import { useConsoleStore } from '../../store/consoleStore';
+import { sqliteRpc } from '../../engine/rpc';
+import { useSessionStore } from '../../store/sessionStore';
 import { SQL_PRESETS } from '../../engine/presets';
 
 const SqlEditor = lazy(() =>
@@ -30,11 +33,40 @@ export const ConsolePane = React.memo(function ConsolePane() {
 
   const handleConfirmPrediction = useCallback(
     async (choice: string) => {
+      const preSession = useSessionStore.getState();
+      let explainPlan = '';
+      try {
+        const eqp = await sqliteRpc.exec(`EXPLAIN QUERY PLAN ${sql.trim()}`);
+        explainPlan = JSON.stringify(eqp.results[0]?.rows ?? '');
+      } catch {
+        // Ignore if EXPLAIN QUERY PLAN is not applicable
+      }
+
       await execute();
       const latestConsole = useConsoleStore.getState();
-      submitChoice(choice, {}, latestConsole);
+      const postSession = useSessionStore.getState();
+      submitChoice(
+        choice,
+        {
+          ...preSession,
+          pageStats: {
+            pageCount: preSession.pageCount,
+            pageSize: preSession.pageSize,
+            freelistCount: preSession.freelistCount,
+          },
+        },
+        {
+          ...latestConsole,
+          explainPlan,
+          pageStats: {
+            pageCount: postSession.pageCount,
+            pageSize: postSession.pageSize,
+            freelistCount: postSession.freelistCount,
+          },
+        }
+      );
     },
-    [execute, submitChoice]
+    [sql, execute, submitChoice]
   );
 
   const handlePresetSelect = useCallback(
@@ -50,6 +82,19 @@ export const ConsolePane = React.memo(function ConsolePane() {
     [loadPreset]
   );
 
+  const handleLoadDemo = useCallback(async () => {
+    const demo = [
+      'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, role TEXT DEFAULT \'user\', score INTEGER DEFAULT 0);',
+      'CREATE INDEX IF NOT EXISTS idx_users_score ON users(score);',
+      'INSERT OR IGNORE INTO users (id, name, role, score) VALUES (1,\'Alice\',\'admin\',95),(2,\'Bob\',\'user\',82),(3,\'Charlie\',\'user\',76),(4,\'Diana\',\'manager\',89),(5,\'Evan\',\'user\',64),(6,\'Fiona\',\'user\',91),(7,\'George\',\'dev\',84),(8,\'Hannah\',\'design\',88),(9,\'Ian\',\'user\',72),(10,\'Julia\',\'lead\',98),(11,\'Kevin\',\'user\',69),(12,\'Laura\',\'support\',79),(13,\'Marcus\',\'dev\',85),(14,\'Nora\',\'analyst\',93),(15,\'Oscar\',\'user\',71),(16,\'Penny\',\'manager\',87),(17,\'Quinn\',\'user\',75),(18,\'Rachel\',\'design\',90),(19,\'Sam\',\'dev\',83),(20,\'Tina\',\'user\',77);',
+      'SELECT * FROM users WHERE score > 80 ORDER BY score DESC;',
+    ].join('\n');
+    loadPreset(demo);
+    setTimeout(() => {
+      useConsoleStore.getState().execute();
+    }, 50);
+  }, [loadPreset]);
+
   const presetOptions = [
     { value: '', label: 'Load Preset…' },
     ...SQL_PRESETS.map((p) => ({ value: p.id, label: p.label })),
@@ -60,6 +105,9 @@ export const ConsolePane = React.memo(function ConsolePane() {
       <div className={styles.headerRow}>
         <span className={styles.headerTitle}>SQL CONSOLE</span>
         <div className={styles.headerControls}>
+          <Button variant="outline" onClick={handleLoadDemo} title="Auto-populate SQLite with demo table, 20 rows, and B-tree index">
+            Load Demo 🚀
+          </Button>
           <Select options={presetOptions} onChange={handlePresetSelect} />
           {status === 'ready' && <Badge variant="real">Ready</Badge>}
           {status === 'running' && <Badge variant="modeled">Running…</Badge>}

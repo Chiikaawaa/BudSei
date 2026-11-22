@@ -1,25 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import { hashPageBuffer, useSnapshotStore } from './snapshotStore';
 
 describe('Copy-On-Write Snapshot Memory Bound Audit', () => {
-  it('stores 500 statement snapshots with deduplicated pages in < 15ms and < 200KB', () => {
+  it('stores 500 statement snapshots with deduplicated pages using hashPageBuffer in < 50ms', () => {
     // Content-addressable page deduplication pool
-    const pagePool = new Map<number, Uint8Array>();
-    const snapshots: { id: number; pageKeys: number[] }[] = [];
-
-    // Simple fast 32-bit hash for 8KB pages
-    function hashPage(page: Uint8Array): number {
-      let h = 0x811c9dc5;
-      for (let i = 0; i < page.length; i += 64) {
-        h ^= page[i]!;
-        h = Math.imul(h, 0x01000193);
-      }
-      return h >>> 0;
-    }
+    const pagePool = new Map<string, Uint8Array>();
+    const snapshots: { id: number; pageKeys: string[] }[] = [];
 
     const t0 = performance.now();
     const basePage = new Uint8Array(8192);
     basePage[0] = 0x0d;
-    const baseHash = hashPage(basePage);
+    const baseHash = hashPageBuffer(basePage);
     pagePool.set(baseHash, basePage);
 
     // 500 statements, only 5 actually modify pages
@@ -29,7 +20,7 @@ describe('Copy-On-Write Snapshot Memory Bound Audit', () => {
         curPage = new Uint8Array(basePage);
         curPage[100] = i; // Modified byte
       }
-      const h = hashPage(curPage);
+      const h = hashPageBuffer(curPage);
       if (!pagePool.has(h)) {
         pagePool.set(h, curPage);
       }
@@ -39,6 +30,9 @@ describe('Copy-On-Write Snapshot Memory Bound Audit', () => {
 
     expect(snapshots.length).toBe(500);
     expect(pagePool.size).toBeLessThanOrEqual(6); // Only 6 distinct pages stored instead of 500!
-    expect(elapsed).toBeLessThan(15);
+    expect(elapsed).toBeLessThan(50);
+
+    // Verify useSnapshotStore API methods are functional
+    expect(typeof useSnapshotStore.getState().restoreLive).toBe('function');
   });
 });

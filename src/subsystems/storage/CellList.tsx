@@ -42,7 +42,16 @@ export const CellList = React.memo(function CellList({ cells, onSelectCell }: Ce
                 </td>
                 <td style={{ color: 'var(--text-secondary)', padding: '4px' }}>
                   {cell.columns
-                    ? cell.columns.map((c) => `${c.typeLabel}: ${String(c.value)}`).join(' | ')
+                    ? cell.columns
+                        .map(
+                          (c) =>
+                            `${c.typeLabel}: ${
+                              c.value instanceof Uint8Array
+                                ? `BLOB(${c.value.byteLength} B)`
+                                : String(c.value)
+                            }`
+                        )
+                        .join(' | ')
                     : `Payload: ${cell.payloadSize} B`}
                 </td>
               </tr>

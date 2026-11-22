@@ -24,13 +24,13 @@ export function readVarint(buffer: Uint8Array, offset: number): VarintResult {
   }
 
   // Multi-byte fallback (3 to 9 bytes)
-  let val = ((b0 & 0x7f) << 7) | ((b1 ?? 0) & 0x7f);
+  let val = ((b0 & 0x7f) * 128) + ((b1 ?? 0) & 0x7f);
   for (let i = 2; i < 8; i++) {
     if (offset + i >= buffer.length) {
       return { value: val, bytesRead: i };
     }
     const byte = buffer[offset + i]!;
-    val = (val << 7) | (byte & 0x7f);
+    val = (val * 128) + (byte & 0x7f);
     if ((byte & 0x80) === 0) {
       return { value: val, bytesRead: i + 1 };
     }
@@ -39,7 +39,7 @@ export function readVarint(buffer: Uint8Array, offset: number): VarintResult {
   // 9th byte takes full 8 bits
   if (offset + 8 < buffer.length) {
     const byte9 = buffer[offset + 8]!;
-    val = (val << 8) | byte9;
+    val = (val * 256) + byte9;
     return { value: val, bytesRead: 9 };
   }
 

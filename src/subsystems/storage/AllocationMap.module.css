@@ -81,8 +81,8 @@
 }
 
 .leafIndex.checked {
-  background: var(--badge-error-text);
-  border-color: var(--badge-error-text);
+  background: #a855f7;
+  border-color: #a855f7;
 }
 
 .interiorIndex.checked {

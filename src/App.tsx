@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { AppLayout } from './app/layout/AppLayout';
+import { StartupAnimation } from './app/StartupAnimation/StartupAnimation';
 import { TopBar } from './shell/TopBar/TopBar';
 import { NavRail } from './shell/NavRail/NavRail';
 import { ConsolePane } from './shell/ConsolePane/ConsolePane';
@@ -7,6 +8,7 @@ import { ResultsPane } from './shell/ResultsPane/ResultsPane';
 import { BottomDrawer } from './shell/BottomDrawer/BottomDrawer';
 import { TheoryDrawer } from './learn/theory-drawer/TheoryDrawer';
 import { CommandPalette } from './shell/CommandPalette';
+import { SettingsMenu } from './shell/SettingsMenu/SettingsMenu';
 import { Cat } from './mascot/Cat';
 import { SubsystemHost } from './subsystems/SubsystemHost';
 import { useSessionStore } from './store/sessionStore';
@@ -34,6 +36,7 @@ export function App() {
 
   return (
     <>
+      <StartupAnimation />
       <AppLayout
         topBar={<TopBar />}
         navRail={<NavRail />}
@@ -51,6 +54,7 @@ export function App() {
       />
       <TheoryDrawer />
       <CommandPalette />
+      <SettingsMenu />
       <Cat />
     </>
   );

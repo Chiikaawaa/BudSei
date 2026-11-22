@@ -44,10 +44,12 @@ export const SchemaDetail = React.memo(function SchemaDetail({
     }
   };
 
+  const isInternal = object.name.startsWith('sqlite_');
+
   return (
     <Card
-      title={`${object.type.toUpperCase()}: ${object.name}`}
-      subtitle={`Table target: ${object.tbl_name}`}
+      title={`${object.type.toUpperCase()}: ${object.name}${isInternal ? ' (INTERNAL)' : ''}`}
+      subtitle={isInternal ? 'Internal SQLite master catalog table' : `Table target: ${object.tbl_name}`}
       headerRight={
         object.rootpage > 0 ? (
           <Button variant="primary" onClick={handleJumpToStorage}>

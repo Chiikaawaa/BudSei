@@ -18,10 +18,12 @@
   color: var(--accent-text);
   border: 1px solid transparent;
   font-weight: 600;
+  box-shadow: 0 0 8px var(--accent-tint-subtle);
 }
 
 .primary:hover {
   background: var(--accent-hover);
+  box-shadow: 0 0 12px var(--accent-border);
 }
 
 .primary:active {

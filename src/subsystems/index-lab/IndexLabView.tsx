@@ -6,6 +6,8 @@ import { TreeCanvas } from './TreeCanvas';
 import { NodeInspector } from './NodeInspector';
 import { SplitTimeline } from './SplitTimeline';
 import { sqliteRpc } from '../../engine/rpc';
+import { useSessionStore } from '../../store/sessionStore';
+import { registerExecutionListener } from '../../store/consoleStore';
 import { buildBtreeModel, findRoutingPath, BtreeNode } from '../../sim/btree-model';
 
 interface SchemaItem {
@@ -46,6 +48,9 @@ export function IndexLabView() {
 
   useEffect(() => {
     loadData();
+    return registerExecutionListener(() => {
+      loadData();
+    });
   }, [loadData]);
 
   const activeItem = schemaItems.find((s) => s.rootpage === selectedRoot) || {
@@ -54,28 +59,32 @@ export function IndexLabView() {
     rootpage: 1,
   };
 
+  const pageSize = useSessionStore((s) => s.pageSize) || 8192;
+
   const model = useMemo(() => {
-    if (!rawImage || rawImage.length < 8192) return null;
+    if (!rawImage || rawImage.length < pageSize) return null;
     return buildBtreeModel(
       rawImage,
       selectedRoot,
-      8192,
+      pageSize,
       activeItem.name,
       activeItem.type === 'index'
     );
-  }, [rawImage, selectedRoot, activeItem]);
+  }, [rawImage, selectedRoot, activeItem, pageSize]);
 
-  const targetKeyNum = parseInt(searchKey, 10);
   const highlightedPath = useMemo(() => {
-    if (isNaN(targetKeyNum) || !model?.rootNode) return [];
-    return findRoutingPath(model.rootNode, targetKeyNum);
-  }, [model, targetKeyNum]);
+    const raw = searchKey.trim();
+    if (!raw || !model?.rootNode) return [];
+    const clean = raw.replace(/^['"]|['"]$/g, '');
+    const num = Number(clean);
+    return findRoutingPath(model.rootNode, isNaN(num) ? clean : num);
+  }, [model, searchKey]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Badge variant="modeled">MODELED</Badge>
+          <Badge variant="modeled" title="MODELED: B-tree hierarchy derived by BUDSEI's parsers from real SQLite disk pages">MODELED</Badge>
           <Badge variant="accent">SUBSYSTEM // INDEX LABORATORY</Badge>
           <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em' }}>
             INDEX LABORATORY
@@ -112,7 +121,11 @@ export function IndexLabView() {
       <div style={{ display: 'flex', gap: '12px' }}>
         <Stat value={model?.depth ?? 1} label="TREE DEPTH" tooltip="Number of levels from root to leaf" />
         <Stat value={model?.totalPages ?? 1} label="TOTAL NODES" tooltip="Allocated B-tree pages for this relation" />
-        <Stat value={`${model?.avgFillFactor ?? 0}%`} label="AVG FILL FACTOR" tooltip="Average page capacity utilized" />
+        <Stat
+          value={model && model.rootNode && (model.rootNode.cellCount > 0 || model.rootNode.keys.length > 0) ? `${model.avgFillFactor}%` : '–'}
+          label="AVG FILL FACTOR"
+          tooltip="Average page capacity utilized (– when empty)"
+        />
         <Stat value={`P${selectedRoot}`} label="ROOTPAGE" tooltip="Physical root page in database file" />
       </div>
 
@@ -122,11 +135,11 @@ export function IndexLabView() {
           Trace Interior Seek Path:
         </span>
         <input
-          type="number"
-          placeholder="Enter target RowID (e.g. 42)"
+          type="text"
+          placeholder="RowID or key (e.g. 5, 'alice')"
           value={searchKey}
           onChange={(e) => setSearchKey(e.target.value)}
-          style={{ padding: '4px 8px', width: '220px', fontFamily: 'var(--font-mono)', fontSize: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '2px' }}
+          style={{ padding: '4px 8px', width: '320px', fontFamily: 'var(--font-mono)', fontSize: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '2px' }}
         />
         {highlightedPath.length > 0 && (
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#10b981' }}>

@@ -5,7 +5,7 @@ export const SplitTimeline = React.memo(function SplitTimeline() {
   const steps = [
     {
       title: '1. Page Threshold Overflow',
-      desc: 'When an INSERT causes cell pointers and payloads to collide in the unallocated gap (< 4 bytes free), a split is triggered.',
+      desc: "When an INSERT causes cell pointers and payloads to collide because the new cell doesn't fit in the remaining free space, a split is triggered.",
     },
     {
       title: '2. Sibling Page Allocation',

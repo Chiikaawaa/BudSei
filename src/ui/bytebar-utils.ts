@@ -5,30 +5,38 @@ import { BtreeCell } from '../parsers/cells';
  * Cells are arranged at descending or ascending offsets.
  */
 export function findCellAtOffset(cells: BtreeCell[], targetOffset: number): BtreeCell | null {
-  if (cells.length === 0) return null;
+  const len = cells.length;
+  if (len === 0) return null;
 
+  const isAsc = cells[0]!.offset <= cells[len - 1]!.offset;
   let low = 0;
-  let high = cells.length - 1;
+  let high = len - 1;
 
   while (low <= high) {
     const mid = (low + high) >> 1;
     const cell = cells[mid]!;
-    const start = cell.offset;
-    const end = cell.offset + cell.size;
-
-    if (targetOffset >= start && targetOffset < end) {
+    if (targetOffset >= cell.offset && targetOffset < cell.offset + cell.size) {
       return cell;
     }
 
-    if (targetOffset < start) {
-      high = mid - 1;
+    if (isAsc) {
+      if (targetOffset < cell.offset) {
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
     } else {
-      low = mid + 1;
+      // Descending order (SQLite cell content grows from end towards start)
+      if (targetOffset < cell.offset) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
     }
   }
 
-  // Linear check nearest neighborhood in case cells are non-monotonic
-  for (let i = Math.max(0, low - 2); i < Math.min(cells.length, low + 3); i++) {
+  // Linear fallback in case cells are non-monotonic (ordered by key instead of offset)
+  for (let i = 0; i < len; i++) {
     const cell = cells[i]!;
     if (targetOffset >= cell.offset && targetOffset < cell.offset + cell.size) {
       return cell;

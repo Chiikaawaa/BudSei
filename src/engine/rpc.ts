@@ -1,4 +1,4 @@
-import type { RpcRequest, RpcResponse, RpcPayload, ExecResponse, InitResponse } from './types';
+import type { RpcRequest, RpcResponse, RpcPayload, ExecResponse, InitResponse, PageStats } from './types';
 
 export class SQLiteRpc {
   private worker: Worker | null = null;
@@ -49,6 +49,10 @@ export class SQLiteRpc {
 
   public export(): Promise<Uint8Array> {
     return this.send<Uint8Array>({ type: 'EXPORT' });
+  }
+
+  public restore(buffer: Uint8Array): Promise<{ pageStats: PageStats }> {
+    return this.send<{ pageStats: PageStats }>({ type: 'RESTORE', buffer });
   }
 
   public pragma(name: string, value?: string | number): Promise<any> {

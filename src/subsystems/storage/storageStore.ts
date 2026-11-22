@@ -3,6 +3,7 @@ import { sqliteRpc } from '../../engine/rpc';
 import { parseHeader100, SqliteHeader100 } from '../../parsers/header100';
 import { parseBtreePage, ParsedBtreePage } from '../../parsers/btree-page';
 import { registerExecutionListener } from '../../store/consoleStore';
+import { useSnapshotStore, getSnapshotBuffer } from '../../learn/history/snapshotStore';
 
 export type PageFilterType = 'TBL-LF' | 'TBL-IN' | 'IDX-LF' | 'IDX-IN' | 'FREE';
 
@@ -41,7 +42,9 @@ export const useStorageStore = create<StorageState>((set, get) => ({
   refreshStorage: async () => {
     try {
       set({ isLoading: true });
-      const image = await sqliteRpc.export();
+      const activeSnapId = useSnapshotStore.getState().activeSnapshotId;
+      const snapBuf = activeSnapId !== null ? getSnapshotBuffer(activeSnapId) : null;
+      const image = snapBuf ?? (await sqliteRpc.export());
       if (!image || image.length < 100) return;
 
       const header = parseHeader100(image);

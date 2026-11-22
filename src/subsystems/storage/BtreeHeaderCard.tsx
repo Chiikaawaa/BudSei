@@ -13,7 +13,12 @@ export const BtreeHeaderCard = React.memo(function BtreeHeaderCard({ header }: B
     { label: 'Page Type Flag', value: `${header.pageType} (0x${header.rawType.toString(16).padStart(2, '0')})` },
     { label: 'First Freeblock', value: `0x${header.firstFreeblock.toString(16).padStart(4, '0')}` },
     { label: 'Cell Count', value: header.cellCount },
-    { label: 'Cell Content Start', value: `0x${header.cellContentStart.toString(16).padStart(4, '0')} (${header.cellContentStart})` },
+    {
+      label: 'Cell Content Start',
+      value: header.cellCount === 0
+        ? `0x${header.cellContentStart.toString(16).padStart(4, '0')} (${header.cellContentStart} — no cells yet)`
+        : `0x${header.cellContentStart.toString(16).padStart(4, '0')} (${header.cellContentStart})`,
+    },
     { label: 'Fragmented Free Bytes', value: header.fragmentedBytes },
     ...(header.rightChildPage !== undefined
       ? [{ label: 'Right-most Child Pointer', value: `Page ${header.rightChildPage}` }]
